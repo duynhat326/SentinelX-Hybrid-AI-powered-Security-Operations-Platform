@@ -1,4 +1,5 @@
 import json
+import os
 
 import pytest
 from fastapi.testclient import TestClient
@@ -8,13 +9,17 @@ KEY = "k" * 32
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
-    monkeypatch.setenv("SENTINELX_DATABASE_URL", f"sqlite+pysqlite:///{tmp_path}/t.db")
+    # Set SENTINELX_TEST_DATABASE_URL to run the suite against PostgreSQL (tables are wiped per test).
+    url = os.environ.get("SENTINELX_TEST_DATABASE_URL") or f"sqlite+pysqlite:///{tmp_path}/t.db"
+    monkeypatch.setenv("SENTINELX_DATABASE_URL", url)
     monkeypatch.setenv("SENTINELX_API_KEY", KEY)
     from app.core import config
     from app.database import session
+    from app.database.models import Base
 
     config.get_settings.cache_clear()
     session._engine = session._factory = None
+    Base.metadata.drop_all(session.get_engine())
     from app.api.main import app
 
     with TestClient(app, headers={"X-API-Key": KEY}) as c:
