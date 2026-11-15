@@ -3,7 +3,7 @@
 > Detect. Investigate. Understand. Respond.
 
 Analyst-assistance mini-SOC: deterministic detection and correlation first, constrained AI assistance second.
-**Status: Milestone 1 (vertical slice).** Ingest → normalize → store → detect → alert → API. No AI, dashboard, correlation or response yet; see [docs/progress.md](docs/progress.md).
+**Status: Milestone 1 (vertical slice).** Ingest → normalize → store → detect → alert → API. No AI, dashboard, correlation or response yet; see [docs/progress.md](docs/progress.md) and the roadmap checklist [docs/checklist.md](docs/checklist.md).
 
 ## Run the tests (no Docker needed)
 ```bash

@@ -39,3 +39,34 @@ def test_powershell_detection_and_benign(client):
 def test_bad_payload_422(client):
     assert client.post("/api/v1/events", json={"source": "linux_auth", "payload": "nope"}).status_code == 422
     assert client.post("/api/v1/events", json={"source": "bogus", "payload": "x"}).status_code == 422
+
+
+def test_concurrent_ingest_one_alert(client):
+    import os
+    from concurrent.futures import ThreadPoolExecutor
+
+    import pytest
+
+    if not os.environ.get("SENTINELX_TEST_DATABASE_URL", "").startswith("postgresql"):
+        pytest.skip("needs PostgreSQL: SQLite serializes writers")
+    with ThreadPoolExecutor(8) as ex:
+        codes = list(ex.map(lambda n: client.post("/api/v1/events", json=ssh_fail(n)).status_code, range(1, 9)))
+    assert codes == [200] * 8
+    alerts = client.get("/api/v1/alerts").json()
+    assert len(alerts) == 1 and alerts[0]["event_count"] == 8
+
+
+def test_out_of_order_arrival_still_alerts_with_full_evidence(client):
+    for n in (5, 4, 3, 2, 1):
+        r = client.post("/api/v1/events", json=ssh_fail(n)).json()
+    assert len(r["alerts"]) == 1 and r["alerts"][0]["event_count"] == 5
+
+
+def test_rate_limit_returns_429(client, monkeypatch):
+    from app.core import config
+
+    monkeypatch.setenv("SENTINELX_RATE_LIMIT_PER_MINUTE", "3")
+    config.get_settings.cache_clear()
+    codes = [client.post("/api/v1/events", json=ssh_fail(n)).status_code for n in range(1, 6)]
+    assert codes == [200, 200, 200, 429, 429]
+    assert client.get("/api/v1/alerts").status_code == 200  # reads are not limited

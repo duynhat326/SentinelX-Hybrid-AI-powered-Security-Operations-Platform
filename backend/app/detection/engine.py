@@ -2,13 +2,18 @@
 import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
 from app.database.models import Alert, AlertEvent, SecurityEvent
+
+
+def _utc(d: datetime) -> datetime:
+    return d if d.tzinfo else d.replace(tzinfo=UTC)  # SQLite drops tzinfo on read
+
 
 Match = tuple[str, list[SecurityEvent]]  # (group_key, evidence events)
 
@@ -28,15 +33,20 @@ class Rule:
 def _bruteforce(db: Session, ev: SecurityEvent, cfg: Settings) -> Match | None:
     if ev.source != "linux_auth" or ev.action != "failure" or not ev.src_ip:
         return None
-    since = ev.timestamp - timedelta(seconds=cfg.bruteforce_window_seconds)
+    w, n = timedelta(seconds=cfg.bruteforce_window_seconds), cfg.bruteforce_threshold
+    # look both ways: logs arrive out of order, so later-stamped events may already be stored
     rows = list(db.scalars(
         select(SecurityEvent).where(
             SecurityEvent.host == ev.host, SecurityEvent.src_ip == ev.src_ip,
             SecurityEvent.category == "authentication", SecurityEvent.action == "failure",
-            SecurityEvent.timestamp >= since, SecurityEvent.timestamp <= ev.timestamp,
+            SecurityEvent.timestamp >= ev.timestamp - w, SecurityEvent.timestamp <= ev.timestamp + w,
         ).order_by(SecurityEvent.timestamp)
     ))
-    return (ev.src_ip, rows) if len(rows) >= cfg.bruteforce_threshold else None
+    # shortcut: any burst within +-window of this event triggers, evidence is the whole +-window set (can span 2x window).
+    for i in range(len(rows) - n + 1):
+        if _utc(rows[i + n - 1].timestamp) - _utc(rows[i].timestamp) <= w:
+            return ev.src_ip, rows
+    return None
 
 
 _PS = re.compile(r"powershell(?:_ise)?\.exe$|pwsh\.exe$", re.IGNORECASE)
