@@ -28,7 +28,7 @@ def payload(ev: dict, i: int, host: str) -> dict:
         what = "Failed password for invalid user" if k == "f" else "Accepted password for"
         line = f"{ts:%Y-%m-%dT%H:%M:%S}+00:00 {host} sshd[1]: {what} {ev['u']} from {ev['ip']} port {40000 + i} ssh2"
         return {"source": "linux_auth", "payload": line}
-    rec = {"UtcTime": f"{ts:%Y-%m-%d %H:%M:%S}.000", "Computer": host, "User": "LAB\\alice", "Image": _path(ev["img"])}
+    rec = {"UtcTime": f"{ts:%Y-%m-%d %H:%M:%S}.000", "Computer": host, "User": ev.get("user", "LAB\\alice"), "Image": _path(ev["img"])}
     if k == "p":
         rec |= {"EventID": 1, "ParentImage": _path(ev["par"]), "CommandLine": ev["cmd"]}
     elif k == "n":

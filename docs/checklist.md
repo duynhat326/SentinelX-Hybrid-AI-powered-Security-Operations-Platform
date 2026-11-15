@@ -56,14 +56,19 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [x] `docs/detection-rules.md` mô tả từng rule, false positive dự kiến, known gap, bảng precision/recall
 - [ ] *Ghi chú, không phải việc phải làm:* precision 1.00 / recall 0.75–0.91 là số **hồi quy trên dữ liệu tổng hợp do cùng một người viết**, không phải đánh giá thật. Recall dưới 0.85 ở SX-001/002/003/004/006 do các known gap cố ý. Đánh giá thật nằm ở M8
 
-## M4 - Correlation, incident, risk engine
-- [ ] Gom alert thành incident theo host/user/IP/process trong cửa sổ thời gian
-- [ ] Chống tạo incident trùng - *Xác nhận:* test idempotent
-- [ ] Timeline bằng chứng của incident (`incident_alerts`, `incident_evidence`)
-- [ ] Risk score 0–100 xác định (0.4·severity + 0.3·correlation + 0.2·TI + 0.1·asset), cấu hình được
-- [ ] Xử lý dữ liệu thiếu (TI chưa có) và ghi chú giới hạn hiệu chuẩn
-- [ ] API: danh sách incident, chi tiết + timeline
-- [ ] Test: cửa sổ thời gian, gộp incident, công thức risk
+## M4 — Correlation, incident, risk engine — XONG, chờ bạn review (nhánh `feat/m4-correlation-risk`)
+- [x] Gom alert thành incident theo host / IP (nguồn hoặc đích) / user / process trong cửa sổ thời gian (`correlation_window_seconds`, mặc định 3600 s) — *Xác nhận:* `test_same_attacker_ip_links_hosts`, `test_user_link_*`, `test_unusual_process_path_links_but_system_binary_does_not`, `test_alerts_far_apart_in_time_are_separate_incidents`
+- [x] Chống tạo incident trùng — *Xác nhận:* `test_same_alert_activity_is_idempotent`; `incident_alerts.alert_id` là khóa chính (mỗi alert tối đa 1 incident)
+- [x] Alert nối hai incident thì gộp lại; alert đến sai thứ tự vẫn gộp đúng — *Xác nhận:* `test_bridging_alert_merges_two_incidents`, `test_out_of_order_alert_arrival_*`
+- [x] Timeline bằng chứng của incident — *Xác nhận:* `test_timeline_is_ordered_cited_and_capped`. **Quyết định:** không tạo bảng `incident_evidence` riêng, timeline suy ra từ `incident_alerts` + `alert_events` (không thể lệch dữ liệu)
+- [x] Risk score 0–100 xác định (0.4·severity + 0.3·correlation + 0.2·TI + 0.1·asset), trọng số cấu hình được và bắt buộc tổng bằng 1 — *Xác nhận:* `tests/test_risk.py` (20 test, tính tay các ví dụ)
+- [x] Xử lý dữ liệu thiếu (chưa có TI): bỏ thành phần đó và chuẩn hóa lại trọng số, không coi là 0; ghi chú giới hạn hiệu chuẩn trong `docs/correlation-and-risk.md`
+- [x] API: `GET /api/v1/incidents`, `GET /api/v1/incidents/{id}` (risk_breakdown, entities, alerts kèm lý do gom, timeline); `incident_id` trong `/api/v1/alerts`
+- [x] Chống race khi nhiều host tạo alert cùng lúc — *Xác nhận:* `test_concurrent_alerts_from_one_attacker_make_one_incident` (8 host đồng thời qua barrier); đã kiểm tra test **fail 4/5 lần khi tắt lock** và pass 5/5 khi bật
+- [x] Backfill alert cũ chưa có incident khi khởi động — *Xác nhận:* `test_backfill_*`, và trong Compose: xóa bảng incident, restart, 2 incident + 4 liên kết được dựng lại
+- [x] Migration `0003` — *Xác nhận:* `test_upgrade_matches_models_and_downgrade_is_clean` chạy trên Postgres
+- [ ] *Ghi chú, không phải việc phải làm:* trọng số, thang điểm và danh sách user/đường dẫn "chung chung" là **ước lượng chưa hiệu chuẩn**. Cần incident gán nhãn từ lab (M8) mới đánh giá được độ đúng của điểm
+- [ ] Chưa có API đóng incident / đổi criticality của asset (cần RBAC và audit, M6); hiện đổi bằng SQL
 
 ## M5 - AI điều tra (LLM chỉ giải thích)
 - [ ] Nhà cung cấp LLM cấu hình được + **mock LLM** cho test/offline

@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
+from app.correlation.engine import correlate_many
 from app.database.models import Alert, Asset, SecurityEvent
 from app.detection.engine import run_detections
 from app.normalization.normalize import prepare
@@ -29,5 +30,7 @@ def ingest(db: Session, cfg: Settings, source: str, payload: str) -> tuple[Secur
         db.rollback()
         return None, []
     alerts = run_detections(db, event, cfg)
+    if alerts:
+        correlate_many(db, alerts, cfg)
     db.commit()
     return event, alerts

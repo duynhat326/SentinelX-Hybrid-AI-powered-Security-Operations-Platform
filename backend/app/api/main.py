@@ -1,28 +1,25 @@
-import hmac
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Annotated, Literal
+from typing import Literal
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.api.auth import require_key
+from app.api.incidents import router as incidents_router
 from app.api.ratelimit import rate_limit
 from app.core.config import Settings, get_settings
+from app.correlation.engine import backfill
 from app.database.models import Alert, DetectionRule
 from app.database.session import get_db, get_factory
 from app.detection.engine import sync_rules
 from app.ingestion.service import ingest
 from app.normalization.normalize import NormalizationError
-
-
-def require_key(x_api_key: Annotated[str, Header()] = "", cfg: Settings = Depends(get_settings)) -> None:
-    if not hmac.compare_digest(x_api_key.encode(), cfg.api_key.encode()):
-        raise HTTPException(401, "invalid API key")
 
 
 class SecureHeaders(BaseHTTPMiddleware):
@@ -38,11 +35,13 @@ async def lifespan(_: FastAPI):
     get_settings()  # fail fast on bad config
     with get_factory()() as db:  # schema comes from `alembic upgrade head`, run before the app starts
         sync_rules(db)
+        backfill(db, get_settings())  # alerts that predate incidents
     yield
 
 
 app = FastAPI(title="SentinelX", version="0.1.0", lifespan=lifespan)
 app.add_middleware(SecureHeaders)
+app.include_router(incidents_router)
 try:
     _origins = get_settings().cors_origins
 except Exception:  # settings are validated again in lifespan; keep import-time safe for tooling
@@ -68,12 +67,14 @@ class AlertOut(BaseModel):
     first_event_at: datetime
     last_event_at: datetime
     evidence_event_ids: list[uuid.UUID]
+    incident_id: uuid.UUID | None
 
 
 def _alert_out(a: Alert) -> AlertOut:
     return AlertOut(**{k: getattr(a, k) for k in ("id", "rule_id", "title", "severity", "status", "host", "mitre", "event_count",
                                                   "first_event_at", "last_event_at")},
-                    evidence_event_ids=[e.event_id for e in a.evidence])
+                    evidence_event_ids=[e.event_id for e in a.evidence],
+                    incident_id=a.incident_link.incident_id if a.incident_link else None)
 
 
 class IngestOut(BaseModel):
@@ -98,7 +99,8 @@ def post_event(body: EventIn, db: Session = Depends(get_db), cfg: Settings = Dep
 
 @app.get("/api/v1/alerts", response_model=list[AlertOut], dependencies=[Depends(require_key)])
 def list_alerts(db: Session = Depends(get_db), limit: int = Query(50, ge=1, le=200)) -> list[AlertOut]:
-    rows = db.scalars(select(Alert).order_by(Alert.created_at.desc()).limit(limit))
+    rows = db.scalars(select(Alert).options(selectinload(Alert.evidence), selectinload(Alert.incident_link))
+                      .order_by(Alert.created_at.desc()).limit(limit))
     return [_alert_out(a) for a in rows]
 
 

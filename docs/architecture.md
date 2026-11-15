@@ -17,15 +17,15 @@ flowchart LR
     subgraph L3[Layer 3: Detection and correlation]
         C1[Rule engine SX-001 to SX-008<br/>app/detection]
         C2[(alerts + alert_events)]
-        C3[Correlation / incidents]:::planned
-        C4[Risk engine 0-100]:::planned
+        C3[Correlation to incidents<br/>app/correlation]
+        C4[Risk engine 0-100<br/>app/risk_engine]
     end
     subgraph L4[Layer 4: Hybrid AI]
         D1[LangGraph: Triage, Investigation]:::planned
         D2[Threat Intel + Response proposals]:::planned
     end
     subgraph L5[Layer 5: Dashboard and response]
-        E1[GET /api/v1/alerts]
+        E1[GET /api/v1/alerts<br/>GET /api/v1/incidents]
         E2[React dashboard]:::planned
         E3[Approval queue + audit log]:::planned
     end
@@ -34,7 +34,8 @@ flowchart LR
     A3 --> B1
     B1 --> B2 --> B3 --> C1 --> C2
     C2 --> E1
-    C2 -.-> C3 -.-> C4 -.-> D1 -.-> D2 -.-> E3
+    C2 --> C3 --> C4 --> E1
+    C4 -.-> D1 -.-> D2 -.-> E3
     E1 -.-> E2
     classDef planned stroke-dasharray: 5 5,fill:#f4f4f4,color:#666
 ```
@@ -60,6 +61,7 @@ sequenceDiagram
     else new event
         API->>R: run_detections(event)
         R->>DB: query window, upsert alert, attach evidence
+        R->>DB: global lock, correlate alert into incident, recompute risk
         API-->>C: event id + alerts
     end
 ```
@@ -70,6 +72,7 @@ sequenceDiagram
 - **Concurrency.** On PostgreSQL, ingestion takes a per-host advisory lock so concurrent events see each other (no duplicate alerts, no missed thresholds). Trade-off: per-host serialization.
 - **Out-of-order logs.** SX-001 and SX-008 look +-window around each event, so late-arriving events still produce a complete alert.
 - **Alert merging.** Alerts for the same (rule, host, group key) merge inside one time window, then a new alert opens. See [detection-rules.md](detection-rules.md).
+- **Incidents and risk.** Alerts sharing an entity inside a time window become one incident; a bridging alert merges incidents. A global advisory lock serializes correlation on PostgreSQL. The risk score is a documented weighted formula that renormalizes over missing components. See [correlation-and-risk.md](correlation-and-risk.md).
 - **Untrusted input.** Every field is validated or dropped; secrets are redacted before storage; raw size is capped.
 - **Shortcuts to revisit:** single shared API key (RBAC in M6), in-memory rate limit (per process), no rule-toggle API (flip `detection_rules.enabled` in SQL), syslog year assumed current UTC year.
 
@@ -82,4 +85,7 @@ sequenceDiagram
 | `backend/app/normalization/normalize.py` | parsers, redaction, dedup hash |
 | `backend/app/ingestion/service.py` | store + detect orchestration |
 | `backend/app/detection/engine.py` | rules and alert upsert |
+| `backend/app/correlation/engine.py` | entities, incident grouping, merge, backfill |
+| `backend/app/risk_engine/score.py` | 0-100 score, weights, missing-data handling |
+| `backend/app/api/incidents.py` | incident list, detail and timeline endpoints |
 | `backend/app/database/` | models and session |

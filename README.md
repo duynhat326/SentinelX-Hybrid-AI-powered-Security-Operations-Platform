@@ -1,9 +1,9 @@
-# SentinelX — Hybrid AI-powered Security Operations Platform
+# SentinelX - Hybrid AI-powered Security Operations Platform
 
 > Detect. Investigate. Understand. Respond.
 
 Analyst-assistance mini-SOC: deterministic detection and correlation first, constrained AI assistance second.
-**Status: Milestone 1 (vertical slice).** Ingest → normalize → store → detect → alert → API. No AI, dashboard, correlation or response yet; see [docs/progress.md](docs/progress.md) and the roadmap checklist [docs/checklist.md](docs/checklist.md).
+**Status: Milestone 4 (deterministic core complete).** Ingest → normalize → store → detect → alert → API. Detection, correlation into incidents and risk scoring work without any LLM. No AI agents, dashboard or response workflow yet; see [docs/progress.md](docs/progress.md) and the roadmap checklist [docs/checklist.md](docs/checklist.md).
 
 ## Run the tests (no Docker needed)
 ```bash
@@ -26,6 +26,8 @@ The backend container runs `alembic upgrade head` before starting. If you ran an
 | POST | `/api/v1/events` | body `{"source": "linux_auth"\|"sysmon"\|"wazuh", "payload": "<sshd line, Sysmon EventID 1/3/12/13 JSON, or a Wazuh alert JSON wrapping one of those>"}` |
 | GET | `/api/v1/alerts` | newest alerts with evidence event IDs |
 | GET | `/api/v1/rules` | detection rules and their enabled state |
+| GET | `/api/v1/incidents` | incidents ordered by risk (filters: `status`, `min_risk`, `limit`) |
+| GET | `/api/v1/incidents/{id}` | risk breakdown, entities, alerts with grouping reason, evidence timeline |
 
 ## Detection rules
 | ID | Rule | MITRE |
