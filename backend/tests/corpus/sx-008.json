@@ -1,0 +1,817 @@
+{
+ "rule": "SX-008",
+ "description": "Synthetic labeled cases. A regression corpus, not a real-world evaluation.",
+ "cases": [
+  {
+   "id": "SX-008-m01",
+   "rule": "SX-008",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "5 failures then success",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 5
+    }
+   ]
+  },
+  {
+   "id": "SX-008-m02",
+   "rule": "SX-008",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "6 failures then success",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 5
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 6
+    }
+   ]
+  },
+  {
+   "id": "SX-008-m03",
+   "rule": "SX-008",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "success at the edge of the window",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 299
+    }
+   ]
+  },
+  {
+   "id": "SX-008-m04",
+   "rule": "SX-008",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "success arrives first, failures after",
+   "events": [
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 10
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    }
+   ]
+  },
+  {
+   "id": "SX-008-m05",
+   "rule": "SX-008",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "failures against several users, success as another",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "admin",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "test",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "oracle",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "pi",
+     "dt": 4
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "deploy",
+     "dt": 5
+    }
+   ]
+  },
+  {
+   "id": "SX-008-m06",
+   "rule": "SX-008",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "10 failures and two successes",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 5
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 6
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 7
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 8
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 9
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 10
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 11
+    }
+   ]
+  },
+  {
+   "id": "SX-008-m07",
+   "rule": "SX-008",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "success arrives in the middle",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 5
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    }
+   ]
+  },
+  {
+   "id": "SX-008-m08",
+   "rule": "SX-008",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "failures arrive after the success event",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 5
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    }
+   ]
+  },
+  {
+   "id": "SX-008-m09",
+   "rule": "SX-008",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "distributed attempts then success from a sixth IP",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.10",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.11",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.12",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.13",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.14",
+     "u": "root",
+     "dt": 4
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 6
+    }
+   ]
+  },
+  {
+   "id": "SX-008-b01",
+   "rule": "SX-008",
+   "label": "benign",
+   "synthetic": true,
+   "note": "4 failures then success (below threshold)",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    }
+   ]
+  },
+  {
+   "id": "SX-008-b02",
+   "rule": "SX-008",
+   "label": "benign",
+   "synthetic": true,
+   "note": "success only",
+   "events": [
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "alice",
+     "dt": 0
+    }
+   ]
+  },
+  {
+   "id": "SX-008-b03",
+   "rule": "SX-008",
+   "label": "benign",
+   "synthetic": true,
+   "note": "5 failures, success from another IP",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.77",
+     "u": "root",
+     "dt": 5
+    }
+   ]
+  },
+  {
+   "id": "SX-008-b04",
+   "rule": "SX-008",
+   "label": "benign",
+   "synthetic": true,
+   "note": "5 failures, no success",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    }
+   ]
+  },
+  {
+   "id": "SX-008-b05",
+   "rule": "SX-008",
+   "label": "benign",
+   "synthetic": true,
+   "note": "success long after the failures",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 400
+    }
+   ]
+  },
+  {
+   "id": "SX-008-b06",
+   "rule": "SX-008",
+   "label": "benign",
+   "synthetic": true,
+   "note": "success before the failures",
+   "events": [
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 5
+    }
+   ]
+  },
+  {
+   "id": "SX-008-b07",
+   "rule": "SX-008",
+   "label": "benign",
+   "synthetic": true,
+   "note": "failures spread over 20 minutes then success",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 300
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 600
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 900
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1200
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1210
+    }
+   ]
+  },
+  {
+   "id": "SX-008-b08",
+   "rule": "SX-008",
+   "label": "benign",
+   "synthetic": true,
+   "note": "2 failures, success, 2 failures, success",
+   "events": [
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 0
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 1
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 2
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 3
+    },
+    {
+     "k": "f",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 4
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "root",
+     "dt": 5
+    }
+   ]
+  },
+  {
+   "id": "SX-008-b09",
+   "rule": "SX-008",
+   "label": "benign",
+   "synthetic": true,
+   "note": "repeated successes",
+   "events": [
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "alice",
+     "dt": 0
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "alice",
+     "dt": 1
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "alice",
+     "dt": 2
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "alice",
+     "dt": 3
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "alice",
+     "dt": 4
+    },
+    {
+     "k": "s",
+     "ip": "203.0.113.50",
+     "u": "alice",
+     "dt": 5
+    }
+   ]
+  }
+ ]
+}

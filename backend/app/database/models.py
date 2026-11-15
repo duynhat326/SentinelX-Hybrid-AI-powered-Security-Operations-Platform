@@ -67,16 +67,19 @@ class SecurityEvent(Base):
 
 class Alert(Base):
     __tablename__ = "alerts"
-    __table_args__ = (Index("ix_alert_dedup", "rule_id", "host", "group_key", unique=True),)
+    # Not unique: a new alert for the same group starts once the merge window has passed (see detection engine).
+    __table_args__ = (Index("ix_alert_group", "rule_id", "host", "group_key"),)
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     rule_id: Mapped[str] = mapped_column(String(64), index=True)
     title: Mapped[str] = mapped_column(String(255))
     severity: Mapped[str] = mapped_column(String(16), index=True)
     status: Mapped[str] = mapped_column(String(16), default="open", index=True)
     host: Mapped[str] = mapped_column(String(255), index=True)
-    group_key: Mapped[str] = mapped_column(String(255))  # e.g. src_ip; prevents duplicate alerts
+    group_key: Mapped[str] = mapped_column(String(255))  # e.g. src_ip; alerts with the same key merge inside the window
     mitre: Mapped[list] = mapped_column(JsonType)
     event_count: Mapped[int] = mapped_column(Integer, default=1)
+    first_event_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))  # earliest evidence event
+    last_event_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))  # latest evidence event
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, index=True)
     evidence: Mapped[list["AlertEvent"]] = relationship(cascade="all, delete-orphan")
 

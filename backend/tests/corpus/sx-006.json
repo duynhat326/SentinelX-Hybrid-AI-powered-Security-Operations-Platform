@@ -1,0 +1,338 @@
+{
+ "rule": "SX-006",
+ "description": "Synthetic labeled cases. A regression corpus, not a real-world evaluation.",
+ "cases": [
+  {
+   "id": "SX-006-m01",
+   "rule": "SX-006",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "powershell to documentation range",
+   "events": [
+    {
+     "k": "n",
+     "img": "powershell.exe",
+     "dst": "203.0.113.9",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-m02",
+   "rule": "SX-006",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "mshta over http",
+   "events": [
+    {
+     "k": "n",
+     "img": "mshta.exe",
+     "dst": "198.51.100.7",
+     "port": 80
+    }
+   ]
+  },
+  {
+   "id": "SX-006-m03",
+   "rule": "SX-006",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "rundll32 to a real public address",
+   "events": [
+    {
+     "k": "n",
+     "img": "rundll32.exe",
+     "dst": "1.1.1.1",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-m04",
+   "rule": "SX-006",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "regsvr32",
+   "events": [
+    {
+     "k": "n",
+     "img": "regsvr32.exe",
+     "dst": "192.0.2.10",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-m05",
+   "rule": "SX-006",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "certutil",
+   "events": [
+    {
+     "k": "n",
+     "img": "certutil.exe",
+     "dst": "203.0.113.50",
+     "port": 80
+    }
+   ]
+  },
+  {
+   "id": "SX-006-m06",
+   "rule": "SX-006",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "bitsadmin",
+   "events": [
+    {
+     "k": "n",
+     "img": "bitsadmin.exe",
+     "dst": "198.51.100.99",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-m07",
+   "rule": "SX-006",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "wscript over IPv6 documentation range",
+   "events": [
+    {
+     "k": "n",
+     "img": "wscript.exe",
+     "dst": "2001:db8::5",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-m08",
+   "rule": "SX-006",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "cscript to a real public address",
+   "events": [
+    {
+     "k": "n",
+     "img": "cscript.exe",
+     "dst": "8.8.4.4",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-m09",
+   "rule": "SX-006",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "pwsh",
+   "events": [
+    {
+     "k": "n",
+     "img": "pwsh.exe",
+     "dst": "198.51.100.23",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-m10",
+   "rule": "SX-006",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "msbuild is not in the binary list",
+   "events": [
+    {
+     "k": "n",
+     "img": "msbuild.exe",
+     "dst": "203.0.113.9",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-m11",
+   "rule": "SX-006",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "installutil is not in the binary list",
+   "events": [
+    {
+     "k": "n",
+     "img": "installutil.exe",
+     "dst": "203.0.113.9",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-b01",
+   "rule": "SX-006",
+   "label": "benign",
+   "synthetic": true,
+   "note": "powershell to RFC1918 10/8",
+   "events": [
+    {
+     "k": "n",
+     "img": "powershell.exe",
+     "dst": "10.0.0.5",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-b02",
+   "rule": "SX-006",
+   "label": "benign",
+   "synthetic": true,
+   "note": "powershell to 192.168/16",
+   "events": [
+    {
+     "k": "n",
+     "img": "powershell.exe",
+     "dst": "192.168.1.10",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-b03",
+   "rule": "SX-006",
+   "label": "benign",
+   "synthetic": true,
+   "note": "mshta to loopback",
+   "events": [
+    {
+     "k": "n",
+     "img": "mshta.exe",
+     "dst": "127.0.0.1",
+     "port": 8080
+    }
+   ]
+  },
+  {
+   "id": "SX-006-b04",
+   "rule": "SX-006",
+   "label": "benign",
+   "synthetic": true,
+   "note": "rundll32 to link-local",
+   "events": [
+    {
+     "k": "n",
+     "img": "rundll32.exe",
+     "dst": "169.254.1.5",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-b05",
+   "rule": "SX-006",
+   "label": "benign",
+   "synthetic": true,
+   "note": "browser to external address",
+   "events": [
+    {
+     "k": "n",
+     "img": "chrome.exe",
+     "dst": "203.0.113.9",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-b06",
+   "rule": "SX-006",
+   "label": "benign",
+   "synthetic": true,
+   "note": "svchost to external address",
+   "events": [
+    {
+     "k": "n",
+     "img": "svchost.exe",
+     "dst": "198.51.100.7",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-b07",
+   "rule": "SX-006",
+   "label": "benign",
+   "synthetic": true,
+   "note": "powershell to IPv6 link-local",
+   "events": [
+    {
+     "k": "n",
+     "img": "powershell.exe",
+     "dst": "fe80::1",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-b08",
+   "rule": "SX-006",
+   "label": "benign",
+   "synthetic": true,
+   "note": "certutil to 172.16/12",
+   "events": [
+    {
+     "k": "n",
+     "img": "certutil.exe",
+     "dst": "172.16.5.5",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-b09",
+   "rule": "SX-006",
+   "label": "benign",
+   "synthetic": true,
+   "note": "certutil to multicast",
+   "events": [
+    {
+     "k": "n",
+     "img": "certutil.exe",
+     "dst": "224.0.0.251",
+     "port": 5353
+    }
+   ]
+  },
+  {
+   "id": "SX-006-b10",
+   "rule": "SX-006",
+   "label": "benign",
+   "synthetic": true,
+   "note": "outlook to a public address",
+   "events": [
+    {
+     "k": "n",
+     "img": "outlook.exe",
+     "dst": "8.8.8.8",
+     "port": 443
+    }
+   ]
+  },
+  {
+   "id": "SX-006-b11",
+   "rule": "SX-006",
+   "label": "benign",
+   "synthetic": true,
+   "note": "process creation, no connection",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe Get-Date"
+    }
+   ]
+  }
+ ]
+}

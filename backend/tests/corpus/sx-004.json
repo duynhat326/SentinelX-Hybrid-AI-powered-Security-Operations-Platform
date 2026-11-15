@@ -1,0 +1,299 @@
+{
+ "rule": "SX-004",
+ "description": "Synthetic labeled cases. A regression corpus, not a real-world evaluation.",
+ "cases": [
+  {
+   "id": "SX-004-m01",
+   "rule": "SX-004",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "net localgroup administrators /add",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net localgroup administrators bob /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-m02",
+   "rule": "SX-004",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "mixed case, domain account",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net localgroup Administrators \"LAB\\bob\" /ADD"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-m03",
+   "rule": "SX-004",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "net1 variant",
+   "events": [
+    {
+     "k": "p",
+     "img": "net1.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net1 localgroup administrators svc /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-m04",
+   "rule": "SX-004",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "quoted group name",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net localgroup \"administrators\" tmp /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-m05",
+   "rule": "SX-004",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Add-LocalGroupMember",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe Add-LocalGroupMember -Group \"Administrators\" -Member bob"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-m06",
+   "rule": "SX-004",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "pwsh, member first",
+   "events": [
+    {
+     "k": "p",
+     "img": "pwsh.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "pwsh.exe Add-LocalGroupMember -Member bob -Group Administrators"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-m07",
+   "rule": "SX-004",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "with /domain",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net localgroup administrators bob /add /domain"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-m08",
+   "rule": "SX-004",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "through cmd /c",
+   "events": [
+    {
+     "k": "p",
+     "img": "cmd.exe",
+     "par": "explorer.exe",
+     "cmd": "cmd /c net localgroup administrators bob /add"
+    },
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net localgroup administrators bob /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-m09",
+   "rule": "SX-004",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "group addressed by SID",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe Add-LocalGroupMember -SID S-1-5-32-544 -Member bob"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-m10",
+   "rule": "SX-004",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "localized group name",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net localgroup administrateurs bob /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-b01",
+   "rule": "SX-004",
+   "label": "benign",
+   "synthetic": true,
+   "note": "list administrators",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net localgroup administrators"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-b02",
+   "rule": "SX-004",
+   "label": "benign",
+   "synthetic": true,
+   "note": "add to Users group",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net localgroup users bob /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-b03",
+   "rule": "SX-004",
+   "label": "benign",
+   "synthetic": true,
+   "note": "add to Remote Desktop Users (a different group, out of scope for this rule)",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net localgroup \"remote desktop users\" bob /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-b04",
+   "rule": "SX-004",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Get-LocalGroupMember",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe Get-LocalGroupMember -Group Administrators"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-b05",
+   "rule": "SX-004",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Add-LocalGroupMember to Users",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe Add-LocalGroupMember -Group \"Users\" -Member bob"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-b06",
+   "rule": "SX-004",
+   "label": "benign",
+   "synthetic": true,
+   "note": "remove from administrators",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net localgroup administrators bob /delete"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-b07",
+   "rule": "SX-004",
+   "label": "benign",
+   "synthetic": true,
+   "note": "account creation only",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net user bob Pw /add"
+    }
+   ]
+  },
+  {
+   "id": "SX-004-b08",
+   "rule": "SX-004",
+   "label": "benign",
+   "synthetic": true,
+   "note": "list domain admins",
+   "events": [
+    {
+     "k": "p",
+     "img": "net.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "net group \"domain admins\""
+    }
+   ]
+  },
+  {
+   "id": "SX-004-b09",
+   "rule": "SX-004",
+   "label": "benign",
+   "synthetic": true,
+   "note": "member name merely containing the word",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "C:\\Windows\\System32\\cmd.exe",
+     "cmd": "powershell.exe Add-LocalGroupMember -Group Users -Member bob_administrators"
+    }
+   ]
+  }
+ ]
+}

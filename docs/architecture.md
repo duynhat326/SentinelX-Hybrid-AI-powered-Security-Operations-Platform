@@ -7,7 +7,7 @@ flowchart LR
     subgraph L1[Layer 1: Data sources]
         A1[Linux sshd auth logs]
         A2[Sysmon EventID 1 JSON]
-        A3[Wazuh alerts]:::planned
+        A3[Wazuh alerts]
     end
     subgraph L2[Layer 2: Ingestion and normalization]
         B1[POST /api/v1/events<br/>API key + rate limit]
@@ -15,7 +15,7 @@ flowchart LR
         B3[(security_events<br/>dedup by hash)]
     end
     subgraph L3[Layer 3: Detection and correlation]
-        C1[Rule engine SX-001, SX-002<br/>app/detection]
+        C1[Rule engine SX-001 to SX-008<br/>app/detection]
         C2[(alerts + alert_events)]
         C3[Correlation / incidents]:::planned
         C4[Risk engine 0-100]:::planned
@@ -31,7 +31,7 @@ flowchart LR
     end
     A1 --> B1
     A2 --> B1
-    A3 -.-> B1
+    A3 --> B1
     B1 --> B2 --> B3 --> C1 --> C2
     C2 --> E1
     C2 -.-> C3 -.-> C4 -.-> D1 -.-> D2 -.-> E3
@@ -68,9 +68,10 @@ sequenceDiagram
 - **Deterministic core.** Rules are Python callables with metadata (id, severity, MITRE, references, enabled). The LLM (M5+) only explains evidence and never changes severity, scores or permissions.
 - **Idempotent ingestion.** A SHA-256 of the redacted raw record is unique; resending is a no-op.
 - **Concurrency.** On PostgreSQL, ingestion takes a per-host advisory lock so concurrent events see each other (no duplicate alerts, no missed thresholds). Trade-off: per-host serialization.
-- **Out-of-order logs.** SX-001 looks +-window around each event, so late-arriving events still produce a complete alert.
+- **Out-of-order logs.** SX-001 and SX-008 look +-window around each event, so late-arriving events still produce a complete alert.
+- **Alert merging.** Alerts for the same (rule, host, group key) merge inside one time window, then a new alert opens. See [detection-rules.md](detection-rules.md).
 - **Untrusted input.** Every field is validated or dropped; secrets are redacted before storage; raw size is capped.
-- **Shortcuts to revisit:** single shared API key (RBAC in M6), in-memory rate limit (per process), `create_all` instead of Alembic (M2), syslog year assumed current UTC year.
+- **Shortcuts to revisit:** single shared API key (RBAC in M6), in-memory rate limit (per process), no rule-toggle API (flip `detection_rules.enabled` in SQL), syslog year assumed current UTC year.
 
 ## Code map
 | Path | Role |
