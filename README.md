@@ -3,7 +3,7 @@
 > Detect. Investigate. Understand. Respond.
 
 Analyst-assistance mini-SOC: deterministic detection and correlation first, constrained AI assistance second.
-**Status: Milestone 4 (deterministic core complete).** Ingest → normalize → store → detect → alert → API. Detection, correlation into incidents and risk scoring work without any LLM. No AI agents, dashboard or response workflow yet; see [docs/progress.md](docs/progress.md) and the roadmap checklist [docs/checklist.md](docs/checklist.md).
+**Status: Milestone 5 (deterministic core plus advisory AI investigation).** Ingest → normalize → store → detect → alert → API. Detection, correlation into incidents and risk scoring work without any LLM. AI investigation (Triage → Investigation, mock LLM only, off by default) explains incidents with cited evidence and never changes scores. No real LLM adapter, dashboard or response workflow yet; see [docs/progress.md](docs/progress.md) and the roadmap checklist [docs/checklist.md](docs/checklist.md).
 
 ## Run the tests (no Docker needed)
 ```bash
@@ -28,6 +28,8 @@ The backend container runs `alembic upgrade head` before starting. If you ran an
 | GET | `/api/v1/rules` | detection rules and their enabled state |
 | GET | `/api/v1/incidents` | incidents ordered by risk (filters: `status`, `min_risk`, `limit`) |
 | GET | `/api/v1/incidents/{id}` | risk breakdown, entities, alerts with grouping reason, evidence timeline |
+| POST | `/api/v1/incidents/{id}/investigate` | run AI triage + investigation (needs `SENTINELX_LLM_PROVIDER`; 503 when `none`) |
+| GET | `/api/v1/incidents/{id}/agent-runs` | stored runs with cited claims, dropped-claim count, refused tool calls |
 
 ## Detection rules
 | ID | Rule | MITRE |

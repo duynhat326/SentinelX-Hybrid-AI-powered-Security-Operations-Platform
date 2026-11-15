@@ -88,4 +88,6 @@ sequenceDiagram
 | `backend/app/correlation/engine.py` | entities, incident grouping, merge, backfill |
 | `backend/app/risk_engine/score.py` | 0-100 score, weights, missing-data handling |
 | `backend/app/api/incidents.py` | incident list, detail and timeline endpoints |
+| `backend/app/agents/` | advisory AI: provider seam, Triage → Investigation, citation check, tool-call refusal |
+| `backend/app/api/agents.py` | investigate and agent-runs endpoints |
 | `backend/app/database/` | models and session |

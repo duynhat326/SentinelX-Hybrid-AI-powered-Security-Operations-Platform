@@ -76,14 +76,14 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [ ] *Chưa làm:* `redact()` bỏ sót dạng không có `=`/`:` (ví dụ `-p mật_khẩu`); mức hardening, chưa phải lỗ hổng cụ thể
 
 ## M5 - AI điều tra (LLM chỉ giải thích)
-- [ ] Nhà cung cấp LLM cấu hình được + **mock LLM** cho test/offline
-- [ ] LangGraph có giới hạn: Triage → Investigation
-- [ ] Đầu ra kiểm tra bằng Pydantic; mọi nhận định trích dẫn event/evidence ID
-- [ ] Bảng `agent_runs` lưu mỗi lần chạy
-- [ ] Hệ thống vẫn phát hiện và chấm điểm khi LLM tắt - *Xác nhận:* test với LLM không khả dụng
-- [ ] Test prompt injection: nội dung log là dữ liệu, tool call trái phép bị từ chối và ghi audit
-- [ ] Test claim không có bằng chứng bị loại (unsupported-claim)
-- [ ] Không đưa secret vào prompt - *Xác nhận:* test redaction trước khi gửi LLM
+- [~] Nhà cung cấp LLM cấu hình được (`SENTINELX_LLM_PROVIDER=none|mock`) + **mock LLM**; chưa có adapter LLM thật
+- [x] Triage → Investigation có giới hạn (2 lời gọi cố định, không vòng lặp). *Lưu ý:* viết bằng Python thuần, chưa dùng LangGraph
+- [x] Đầu ra kiểm tra bằng Pydantic; mọi nhận định trích dẫn event/evidence ID
+- [x] Bảng `agent_runs` lưu mỗi lần chạy
+- [x] Hệ thống vẫn phát hiện và chấm điểm khi LLM tắt - *Xác nhận:* test với LLM không khả dụng
+- [x] Test prompt injection: nội dung log là dữ liệu, tool call trái phép bị từ chối và ghi audit
+- [x] Test claim không có bằng chứng bị loại (unsupported-claim)
+- [x] Không đưa secret vào prompt - *Xác nhận:* test redaction trước khi gửi LLM
 
 ## M6 - Threat intel, phản ứng, phân quyền
 - [ ] RBAC: bảng users/roles, đăng nhập, thay API key chung
