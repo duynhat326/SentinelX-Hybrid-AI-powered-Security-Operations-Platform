@@ -73,7 +73,7 @@ sequenceDiagram
 - **Out-of-order logs.** SX-001 and SX-008 look +-window around each event, so late-arriving events still produce a complete alert.
 - **Alert merging.** Alerts for the same (rule, host, group key) merge inside one time window, then a new alert opens. See [detection-rules.md](detection-rules.md).
 - **Incidents and risk.** Alerts sharing an entity inside a time window become one incident; a bridging alert merges incidents. A global advisory lock serializes correlation on PostgreSQL. The risk score is a documented weighted formula that renormalizes over missing components. See [correlation-and-risk.md](correlation-and-risk.md).
-- **Untrusted input.** Every field is validated or dropped; secrets are redacted before storage; raw size is capped.
+- **Untrusted input.** Every field is validated or dropped; secrets are redacted before storage; raw size is capped. Usernames in sshd lines are attacker-controlled, so the line is parsed from its end (the real `from <ip> port N` comes last) and a username containing a fake one cannot change the recorded source IP. Field sizes never decide whether an event is stored: indexed columns are bounded (hostname over 255 chars is rejected with 422, usernames truncated to 255), path columns are unbounded `TEXT`, and a database `DataError` becomes a 422, never a silent 500 that would drop the event.
 - **Shortcuts to revisit:** single shared API key (RBAC in M6), in-memory rate limit (per process), no rule-toggle API (flip `detection_rules.enabled` in SQL), syslog year assumed current UTC year.
 
 ## Code map

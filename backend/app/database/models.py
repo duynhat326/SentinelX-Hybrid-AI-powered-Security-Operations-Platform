@@ -57,8 +57,8 @@ class SecurityEvent(Base):
     src_port: Mapped[int | None] = mapped_column(Integer)
     dst_ip: Mapped[str | None] = mapped_column(String(45), index=True)
     dst_port: Mapped[int | None] = mapped_column(Integer)
-    process_name: Mapped[str | None] = mapped_column(String(512))
-    parent_process_name: Mapped[str | None] = mapped_column(String(512))
+    process_name: Mapped[str | None] = mapped_column(Text)  # unbounded: an over-long path must not drop the event
+    parent_process_name: Mapped[str | None] = mapped_column(Text)
     command_line: Mapped[str | None] = mapped_column(Text)
     registry_key: Mapped[str | None] = mapped_column(Text)
     registry_value: Mapped[str | None] = mapped_column(Text)  # Sysmon "Details" of a SetValue, redacted

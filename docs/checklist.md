@@ -70,6 +70,11 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [ ] *Ghi chú, không phải việc phải làm:* trọng số, thang điểm và danh sách user/đường dẫn "chung chung" là **ước lượng chưa hiệu chuẩn**. Cần incident gán nhãn từ lab (M8) mới đánh giá được độ đúng của điểm
 - [ ] Chưa có API đóng incident / đổi criticality của asset (cần RBAC và audit, M6); hiện đổi bằng SQL
 
+## Sửa lỗi từ /security-review toàn repo (nhánh `fix/security-review-findings`) — XONG, chờ bạn review
+- [x] **Vuln 1 (High): username chứa `from <ip> port N` làm sai IP nguồn SSH** → kẻ tấn công đổi IP giả mỗi lần thử để né SX-001/SX-008 và đổ tội cho IP vô can. Sửa: regex neo cuối dòng, `.+` tham lam nuốt phần trước `from <ip> port N ssh2` thật. *Xác nhận:* `test_injected_username_cannot_change_source_ip_or_outcome`, `test_username_injection_does_not_evade_the_bruteforce_rule` (đã thấy fail trước khi sửa)
+- [x] **Vuln 2 (Medium): event có trường quá dài bị bỏ bằng HTTP 500 trên Postgres** (đường dẫn process > 512 ký tự né mọi rule Windows). Sửa: `process_name`/`parent_process_name` thành `TEXT` (migration `0004`), `user` cắt còn 255, `host` > 255 trả 422 rõ ràng, `group_key` cắt 255, `DataError` của DB thành 422. *Xác nhận:* `tests/test_security.py` trên Postgres (đã fail trước khi sửa), smoke test Compose
+- [ ] *Chưa làm:* `redact()` bỏ sót dạng không có `=`/`:` (ví dụ `-p mật_khẩu`); mức hardening, chưa phải lỗ hổng cụ thể
+
 ## M5 - AI điều tra (LLM chỉ giải thích)
 - [ ] Nhà cung cấp LLM cấu hình được + **mock LLM** cho test/offline
 - [ ] LangGraph có giới hạn: Triage → Investigation
