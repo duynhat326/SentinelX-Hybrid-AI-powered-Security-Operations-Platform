@@ -82,9 +82,46 @@ class Alert(Base):
     last_event_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))  # latest evidence event
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, index=True)
     evidence: Mapped[list["AlertEvent"]] = relationship(cascade="all, delete-orphan")
+    incident_link: Mapped["IncidentAlert | None"] = relationship(uselist=False, viewonly=True)
 
 
 class AlertEvent(Base):
     __tablename__ = "alert_events"
     alert_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("alerts.id", ondelete="CASCADE"), primary_key=True)
     event_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("security_events.id", ondelete="RESTRICT"), primary_key=True)
+
+
+class Incident(Base):
+    """A group of related alerts. Severity, risk and title are derived from its alerts and recomputed on change."""
+
+    __tablename__ = "incidents"
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    title: Mapped[str] = mapped_column(String(300))
+    severity: Mapped[str] = mapped_column(String(16), index=True)  # highest alert severity
+    status: Mapped[str] = mapped_column(String(16), default="open", index=True)
+    risk_score: Mapped[int] = mapped_column(Integer, index=True)  # 0-100, deterministic (app/risk_engine)
+    risk_breakdown: Mapped[dict] = mapped_column(JsonType)
+    first_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    last_seen: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
+
+
+class IncidentAlert(Base):
+    """alert_id is the primary key: an alert belongs to at most one incident."""
+
+    __tablename__ = "incident_alerts"
+    alert_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("alerts.id", ondelete="CASCADE"), primary_key=True)
+    incident_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("incidents.id", ondelete="CASCADE"), index=True)
+    reason: Mapped[str] = mapped_column(String(600))  # why it was grouped, e.g. "ip:203.0.113.50" or "seed"
+    linked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class IncidentEntity(Base):
+    """Entities (host, ip, user, process) seen in an incident's alerts; the lookup used to link new alerts."""
+
+    __tablename__ = "incident_entities"
+    __table_args__ = (Index("ix_incident_entity_lookup", "kind", "value"),)
+    incident_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("incidents.id", ondelete="CASCADE"), primary_key=True)
+    kind: Mapped[str] = mapped_column(String(16), primary_key=True)  # host | ip | user | process
+    value: Mapped[str] = mapped_column(String(512), primary_key=True)

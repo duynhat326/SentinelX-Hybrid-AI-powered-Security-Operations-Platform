@@ -1,12 +1,15 @@
 # Database schema
 
-PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0002`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
+PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0003`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
 
 ```mermaid
 erDiagram
     assets ||--o{ security_events : "observed on"
     security_events ||--o{ alert_events : "is evidence in"
     alerts ||--o{ alert_events : "has evidence"
+    incidents ||--o{ incident_alerts : "groups"
+    alerts ||--o| incident_alerts : "belongs to at most one"
+    incidents ||--o{ incident_entities : "involves"
 
     assets {
         uuid id PK
@@ -62,6 +65,29 @@ erDiagram
         uuid alert_id PK, FK
         uuid event_id PK, FK
     }
+    incidents {
+        uuid id PK
+        string title "derived"
+        string severity "highest alert severity, indexed"
+        string status "open | closed, indexed"
+        int risk_score "0-100, deterministic, indexed"
+        jsonb risk_breakdown "components, weights, missing"
+        timestamptz first_seen "indexed"
+        timestamptz last_seen "indexed"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    incident_alerts {
+        uuid alert_id PK, FK "one incident per alert"
+        uuid incident_id FK "indexed"
+        string reason "entity that linked it, or seed"
+        timestamptz linked_at
+    }
+    incident_entities {
+        uuid incident_id PK, FK
+        string kind PK "host | ip | user | process"
+        string value PK
+    }
 ```
 
 ## Constraints and policies
@@ -71,12 +97,16 @@ erDiagram
 | `alerts` | non-unique index `(rule_id, host, group_key)` | an alert absorbs matching events inside the merge window; a later match opens a new alert (per-host ingestion lock prevents concurrent duplicates) |
 | `assets` | unique `hostname`, CHECK `criticality BETWEEN 1 AND 5` | one asset per host, valid criticality for the risk engine |
 | `security_events` | FK `asset_id` to `assets` (`ON DELETE RESTRICT`) | an asset with events cannot be deleted |
+| `incident_alerts` | PK `alert_id` (so an alert is in at most one incident), FK to `alerts` and `incidents` (`ON DELETE CASCADE`) | no duplicate grouping |
+| `incident_entities` | composite PK `(incident_id, kind, value)`, index `(kind, value)`, FK `ON DELETE CASCADE` | fast lookup of incidents sharing an entity |
 | `alert_events` | composite PK, FK to `alerts` (`ON DELETE CASCADE`), FK to `security_events` (`ON DELETE RESTRICT`) | evidence can never silently lose its event |
 
 Events are never deleted by the application. No credentials or API tokens are stored; `redact()` masks `password`, `token`, `api_key` and `secret` values before storage.
 
+Incidents have no separate evidence table: the timeline is derived from `incident_alerts` and `alert_events` (see [correlation-and-risk.md](correlation-and-risk.md)). SQLite does not enforce `ON DELETE CASCADE` here, so the application deletes dependent rows explicitly when merging incidents.
+
 ## Planned tables (not created yet)
-`incidents`, `incident_alerts`, `incident_evidence` (M4), `agent_runs` (M5), `users`, `roles`, `response_actions`, `audit_logs`, `iocs` (M6).
+`agent_runs` (M5), `users`, `roles`, `response_actions`, `audit_logs`, `iocs` (M6).
 
 ## Migration workflow
 Alembic reads `SENTINELX_DATABASE_URL` directly (no API key needed).

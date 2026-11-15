@@ -2,19 +2,15 @@
 import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from ipaddress import ip_address, ip_network
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
+from app.core.timeutil import utc as _utc
 from app.database.models import Alert, AlertEvent, DetectionRule, SecurityEvent
-
-
-def _utc(d: datetime) -> datetime:
-    return d if d.tzinfo else d.replace(tzinfo=UTC)  # SQLite drops tzinfo on read
-
 
 Match = tuple[str, list[SecurityEvent]]  # (group_key, evidence events)
 
