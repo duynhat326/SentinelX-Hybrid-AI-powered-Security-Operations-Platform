@@ -17,6 +17,7 @@ services:
     environment:
       SENTINELX_API_KEY: ${SENTINELX_API_KEY:?set SENTINELX_API_KEY in .env}
       SENTINELX_DATABASE_URL: postgresql+psycopg://sentinelx:${POSTGRES_PASSWORD}@db:5432/sentinelx
+      SENTINELX_LLM_PROVIDER: ${SENTINELX_LLM_PROVIDER:-none}  # none = AI investigation off (default)
     ports: ["127.0.0.1:8000:8000"]
 volumes:
   pgdata:

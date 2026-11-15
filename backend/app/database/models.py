@@ -135,6 +135,10 @@ class AgentRun(Base):
     incident_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("incidents.id", ondelete="CASCADE"), index=True)
     status: Mapped[str] = mapped_column(String(16))  # ok | failed
     provider: Mapped[str] = mapped_column(String(32))
+    model: Mapped[str] = mapped_column(String(64), default="")  # model identifier, provenance
+    prompt_version: Mapped[str] = mapped_column(String(16), default="v1")  # prompt template version, provenance
+    input_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)  # hash of the exact context sent to the model
+    duration_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
     output: Mapped[dict | None] = mapped_column(JsonType, nullable=True)  # validated, cited claims only
     dropped_claims: Mapped[int] = mapped_column(Integer, default=0)  # claims without valid evidence citations
     rejected_tool_calls: Mapped[list] = mapped_column(JsonType, default=list)  # audit of refused tool calls

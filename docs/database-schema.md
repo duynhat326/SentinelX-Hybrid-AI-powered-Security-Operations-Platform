@@ -1,6 +1,6 @@
 # Database schema
 
-PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0004`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
+PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0006`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
 
 ```mermaid
 erDiagram
@@ -10,6 +10,7 @@ erDiagram
     incidents ||--o{ incident_alerts : "groups"
     alerts ||--o| incident_alerts : "belongs to at most one"
     incidents ||--o{ incident_entities : "involves"
+    incidents ||--o{ agent_runs : "investigated by"
 
     assets {
         uuid id PK
@@ -88,6 +89,21 @@ erDiagram
         string kind PK "host | ip | user | process"
         string value PK
     }
+    agent_runs {
+        uuid id PK
+        uuid incident_id FK "indexed"
+        string status "ok | failed"
+        string provider "none/mock/..."
+        string model "provenance"
+        string prompt_version "provenance"
+        string input_sha256 "hash of the exact context sent"
+        int duration_ms
+        jsonb output "validated, cited claims only"
+        int dropped_claims "claims and techniques without valid citations"
+        jsonb rejected_tool_calls "audit of refused tool calls"
+        string error "class name or schema paths only"
+        timestamptz created_at
+    }
 ```
 
 ## Constraints and policies
@@ -106,7 +122,7 @@ Events are never deleted by the application. No credentials or API tokens are st
 Incidents have no separate evidence table: the timeline is derived from `incident_alerts` and `alert_events` (see [correlation-and-risk.md](correlation-and-risk.md)). SQLite does not enforce `ON DELETE CASCADE` here, so the application deletes dependent rows explicitly when merging incidents.
 
 ## Planned tables (not created yet)
-`agent_runs` (M5), `users`, `roles`, `response_actions`, `audit_logs`, `iocs` (M6).
+`users`, `roles`, `response_actions`, `audit_logs`, `iocs` (M6).
 
 ## Migration workflow
 Alembic reads `SENTINELX_DATABASE_URL` directly (no API key needed).

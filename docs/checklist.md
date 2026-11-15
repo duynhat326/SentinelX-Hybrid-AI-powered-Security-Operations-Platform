@@ -75,15 +75,21 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [x] **Vuln 2 (Medium): event có trường quá dài bị bỏ bằng HTTP 500 trên Postgres** (đường dẫn process > 512 ký tự né mọi rule Windows). Sửa: `process_name`/`parent_process_name` thành `TEXT` (migration `0004`), `user` cắt còn 255, `host` > 255 trả 422 rõ ràng, `group_key` cắt 255, `DataError` của DB thành 422. *Xác nhận:* `tests/test_security.py` trên Postgres (đã fail trước khi sửa), smoke test Compose
 - [ ] *Chưa làm:* `redact()` bỏ sót dạng không có `=`/`:` (ví dụ `-p mật_khẩu`); mức hardening, chưa phải lỗ hổng cụ thể
 
-## M5 - AI điều tra (LLM chỉ giải thích)
-- [~] Nhà cung cấp LLM cấu hình được (`SENTINELX_LLM_PROVIDER=none|mock`) + **mock LLM**; chưa có adapter LLM thật
-- [x] Triage → Investigation có giới hạn (2 lời gọi cố định, không vòng lặp). *Lưu ý:* viết bằng Python thuần, chưa dùng LangGraph
-- [x] Đầu ra kiểm tra bằng Pydantic; mọi nhận định trích dẫn event/evidence ID
+## M5 - AI điều tra (LLM chỉ giải thích) - phần mã XONG, còn thiếu adapter LLM thật
+- [~] Nhà cung cấp LLM cấu hình được (`SENTINELX_LLM_PROVIDER=none|mock`, Compose truyền biến này) + **mock LLM**; **chưa có adapter LLM thật** (giao diện `LLM.complete(system, user, timeout)` đã sẵn)
+- [x] Triage → Investigation là **LangGraph** có giới hạn: 2 node nối thẳng, đúng 2 lời gọi model, không vòng lặp (`recursion_limit` 10). *Xác nhận:* `test_the_workflow_is_a_fixed_two_step_graph_with_two_model_calls`
+- [x] Đầu ra kiểm tra bằng Pydantic; mọi nhận định trích dẫn **alert/event id** (id của incident không được tính là bằng chứng). *Xác nhận:* `test_unsupported_claims_are_dropped_and_the_incident_id_is_not_evidence` (đã thử phá mã: test fail)
+- [x] Đầu ra có `confidence`, `uncertainties`, `likely_techniques` (phải là technique rule đã gán cho incident và có trích dẫn), `scope` host/user/IP **suy ra từ incident, không lấy từ model**. *Xác nhận:* `test_techniques_*`, `test_scope_is_derived_*`
+- [x] Provenance và đo lường mỗi run: `provider`, `model`, `prompt_version`, `input_sha256`, `duration_ms` (migration `0006`). *Xác nhận:* `test_run_is_stored_with_cited_claims_scope_and_provenance`, migration giữ nguyên run cũ trên Postgres
 - [x] Bảng `agent_runs` lưu mỗi lần chạy
-- [x] Hệ thống vẫn phát hiện và chấm điểm khi LLM tắt - *Xác nhận:* test với LLM không khả dụng
-- [x] Test prompt injection: nội dung log là dữ liệu, tool call trái phép bị từ chối và ghi audit
+- [x] Hệ thống vẫn phát hiện và chấm điểm khi LLM tắt - *Xác nhận:* `test_ai_off_still_detects_and_scores_and_investigate_is_503`, Compose mặc định `none` trả 503
+- [x] Test prompt injection: nội dung log là dữ liệu, tool call trái phép bị từ chối và ghi audit; **mọi** dạng tool call (quá dài, không phải object, quá nhiều, không phải list) đều được ghi trong giới hạn mà không làm hỏng run
 - [x] Test claim không có bằng chứng bị loại (unsupported-claim)
 - [x] Không đưa secret vào prompt - *Xác nhận:* test redaction trước khi gửi LLM
+- [x] Lỗi không rò rỉ: `error` chỉ chứa tên lớp exception hoặc đường dẫn schema, không có thông điệp của provider (có thể chứa khóa API) hay nội dung model. *Xác nhận:* `test_failures_are_recorded_without_leaking_provider_or_model_text`
+- [x] Chi phí/độ bền: rate limit riêng cho `POST /investigate` (mặc định 10/phút/IP), `timeout` truyền cho provider (mặc định 30 s), văn bản tư vấn bị cắt chứ không làm fail run
+- [ ] Adapter LLM thật (Ollama hoặc API) — cần khi muốn dùng thật; phải tự áp `timeout`, và cân nhắc cảnh báo riêng tư khi gửi dữ liệu ra ngoài
+- [ ] Đánh giá chất lượng AI (evidence accuracy, hallucination) với dữ liệu lab — thuộc M8; hiện chỉ kiểm tra được *id có tồn tại*, chưa kiểm tra *câu có đúng*
 
 ## M6 - Threat intel, phản ứng, phân quyền
 - [ ] RBAC: bảng users/roles, đăng nhập, thay API key chung

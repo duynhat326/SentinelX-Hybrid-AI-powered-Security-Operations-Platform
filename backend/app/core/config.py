@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     risk_weight_asset: float = Field(default=0.1, ge=0)
     llm_provider: Literal["none", "mock"] = "none"  # none = AI off; detection and scoring never depend on it
     llm_max_prompt_chars: int = Field(default=12000, ge=2000)
+    llm_timeout_seconds: float = Field(default=30, gt=0, le=300)  # passed to the provider for each call
+    llm_rate_limit_per_minute: int = Field(default=10, ge=1)  # per client IP; each run is two model calls
     cors_origins: list[str] = []
 
     @model_validator(mode="after")
