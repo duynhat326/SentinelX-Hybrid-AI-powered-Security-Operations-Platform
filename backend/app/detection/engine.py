@@ -192,7 +192,7 @@ def run_detections(db: Session, ev: SecurityEvent, cfg: Settings, rules: list[Ru
     for rule in rules if rules is not None else RULES:
         if not rule.enabled or rule.id in disabled or not (m := rule.check(db, ev, cfg)):
             continue
-        key, evidence = m
+        key, evidence = m[0][:255], m[1]  # group_key column is 255 chars; keys embed attacker-influenced names
         stamps = [_utc(e.timestamp) for e in evidence]
         lo, hi = min(stamps), max(stamps)
         # shortcut: one merge window (the brute-force window) for every rule; an alert for the same

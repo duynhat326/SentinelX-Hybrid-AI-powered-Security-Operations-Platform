@@ -13,14 +13,17 @@ _SYSLOG = re.compile(
     r"^(?P<ts>\d{4}-\d\d-\d\dT[\d:.]+(?:Z|[+-]\d\d:\d\d)|[A-Z][a-z]{2}\s+\d+\s[\d:]{8})\s+"
     r"(?P<host>\S+)\s+sshd(?:\[\d+\])?:\s+(?P<msg>.*)$"
 )
-_FAIL = re.compile(r"Failed (?:password|publickey) for (?:invalid user )?(?P<user>\S+) from (?P<ip>\S+)")
-_OK = re.compile(r"Accepted (?:password|publickey) for (?P<user>\S+) from (?P<ip>\S+)")
+# The username is attacker-controlled and may contain spaces and a fake " from <ip> port N". sshd appends the real
+# " from <ip> port N ssh2" last, so anchor to the end of the line and let the greedy user group absorb everything before it.
+_TAIL = r" from (?P<ip>\S+) port \d+(?: ssh2(?:: \S+ \S+)?)?$"
+_FAIL = re.compile(r"^Failed (?:password|publickey) for (?:invalid user )?(?P<user>.+)" + _TAIL)
+_OK = re.compile(r"^Accepted (?:password|publickey) for (?P<user>.+)" + _TAIL)
 
 
 class NormalizedEvent(BaseModel):
     timestamp: datetime
     source: str
-    host: str
+    host: str = Field(max_length=255)  # a longer name is not a hostname; rejected loudly (422) instead of failing in the database
     category: str  # authentication | process | network | registry
     action: str
     user: str | None = None
@@ -33,6 +36,11 @@ class NormalizedEvent(BaseModel):
     command_line: str | None = None
     registry_key: str | None = None
     registry_value: str | None = None
+
+    @field_validator("user")
+    @classmethod
+    def _user_fits_column(cls, v: str | None) -> str | None:
+        return v[:255] if v else v  # attacker-chosen usernames can be long: keep the event, drop the excess
 
     @field_validator("src_ip", "dst_ip")
     @classmethod
@@ -66,7 +74,7 @@ def normalize_linux_auth(line: str, now: datetime | None = None) -> NormalizedEv
     if not m:
         raise NormalizationError("unrecognized sshd syslog line")
     for pat, action in ((_FAIL, "failure"), (_OK, "success")):
-        d = pat.search(m["msg"])
+        d = pat.match(m["msg"])
         if d:
             try:
                 return NormalizedEvent(

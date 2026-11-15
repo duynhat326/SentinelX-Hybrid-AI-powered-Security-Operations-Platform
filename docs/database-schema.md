@@ -1,6 +1,6 @@
 # Database schema
 
-PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0003`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
+PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0004`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
 
 ```mermaid
 erDiagram
@@ -32,16 +32,16 @@ erDiagram
         timestamptz ingested_at
         uuid asset_id FK "indexed"
         string source "linux_auth | sysmon, indexed"
-        string host "indexed"
+        string host "indexed, max 255 else 422"
         string category "authentication | process | network | registry"
         string action "failure | success | create | connect | create_key | delete_key | set_value"
-        string user "indexed"
+        string user "indexed, truncated to 255"
         string src_ip "indexed"
         int src_port
         string dst_ip "indexed"
         int dst_port
-        string process_name
-        string parent_process_name
+        text process_name "unbounded: long paths must not drop events"
+        text parent_process_name
         text command_line "secrets redacted"
         text registry_key
         text registry_value "Sysmon Details, redacted"
