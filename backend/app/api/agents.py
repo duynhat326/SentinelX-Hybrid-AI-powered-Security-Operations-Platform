@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.agents.investigate import investigate
 from app.agents.llm import LLM, get_llm
 from app.api.auth import require_key
-from app.api.ratelimit import rate_limit
+from app.api.ratelimit import llm_rate_limit
 from app.core.config import Settings, get_settings
 from app.database.models import AgentRun, Incident
 from app.database.session import get_db
@@ -24,14 +24,18 @@ class AgentRunOut(BaseModel):
     incident_id: uuid.UUID
     status: str
     provider: str
+    model: str
+    prompt_version: str
+    input_sha256: str | None
+    duration_ms: int | None
     output: dict[str, Any] | None
     dropped_claims: int
-    rejected_tool_calls: list[Any]
+    rejected_tool_calls: list[dict[str, str]]  # name and truncated args of each refused tool call
     error: str | None
     created_at: datetime
 
 
-@router.post("/{incident_id}/investigate", response_model=AgentRunOut, dependencies=[Depends(rate_limit)])
+@router.post("/{incident_id}/investigate", response_model=AgentRunOut, dependencies=[Depends(llm_rate_limit)])
 def run_investigation(incident_id: uuid.UUID, db: Session = Depends(get_db), cfg: Settings = Depends(get_settings),
                       llm: LLM | None = Depends(get_llm)) -> AgentRun:
     if llm is None:
