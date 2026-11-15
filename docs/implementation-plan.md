@@ -10,7 +10,7 @@
 ## Milestones and acceptance
 | # | Scope | Acceptance |
 |---|---|---|
-| 1 | Slice: ingest one event → normalize → store → detect → alert → API | tests, ruff, mypy green; Compose builds (**pending Docker**) |
+| 1 | Slice: ingest one event → normalize → store → detect → alert → API | tests, ruff, mypy green; Compose builds and runs (verified) |
 | 2 | Alembic migrations, Wazuh input, Windows event/Sysmon breadth, assets table | migration up/down tested on Postgres |
 | 3 | 5–8 rules with fixtures, enable/disable, labeled benign/malicious set | per-rule TP/FP tests |
 | 4 | Correlation → incidents/timeline, risk engine 0–100 | dedup + window tests, documented formula |

@@ -8,9 +8,11 @@ Analyst-assistance mini-SOC: deterministic detection and correlation first, cons
 ## Run the tests (no Docker needed)
 ```bash
 cd backend && uv sync && uv run pytest -q
+# against PostgreSQL:
+SENTINELX_TEST_DATABASE_URL=postgresql+psycopg://user:pass@localhost:5432/db uv run pytest -q
 ```
 
-## Run with Docker Compose (not yet verified, see progress.md)
+## Run with Docker Compose
 ```bash
 cp .env.example .env   # fill in SENTINELX_API_KEY and POSTGRES_PASSWORD
 docker compose up --build
