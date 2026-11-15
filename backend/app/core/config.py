@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     bruteforce_threshold: int = Field(default=5, ge=2)
     bruteforce_window_seconds: int = Field(default=300, ge=10)
     max_raw_bytes: int = Field(default=8192, ge=256)
+    rate_limit_per_minute: int = Field(default=600, ge=1)
     cors_origins: list[str] = []
 
 

@@ -13,11 +13,13 @@ def client(tmp_path, monkeypatch):
     url = os.environ.get("SENTINELX_TEST_DATABASE_URL") or f"sqlite+pysqlite:///{tmp_path}/t.db"
     monkeypatch.setenv("SENTINELX_DATABASE_URL", url)
     monkeypatch.setenv("SENTINELX_API_KEY", KEY)
+    from app.api import ratelimit
     from app.core import config
     from app.database import session
     from app.database.models import Base
 
     config.get_settings.cache_clear()
+    ratelimit.reset()
     session._engine = session._factory = None
     Base.metadata.drop_all(session.get_engine())
     from app.api.main import app

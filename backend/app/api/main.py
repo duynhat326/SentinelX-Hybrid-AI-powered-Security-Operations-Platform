@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.api.ratelimit import rate_limit
 from app.core.config import Settings, get_settings
 from app.database.models import Alert, Base
 from app.database.session import get_db, get_engine
@@ -81,7 +82,7 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/api/v1/events", response_model=IngestOut, dependencies=[Depends(require_key)])
+@app.post("/api/v1/events", response_model=IngestOut, dependencies=[Depends(require_key), Depends(rate_limit)])
 def post_event(body: EventIn, db: Session = Depends(get_db), cfg: Settings = Depends(get_settings)) -> IngestOut:
     try:
         event, alerts = ingest(db, cfg, body.source, body.payload)
