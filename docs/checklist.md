@@ -27,17 +27,20 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [x] Thêm `graphify-out/`, `.codegraph/`, `.claude/` vào `.gitignore`
 - [x] Rate limiting `POST /api/v1/events` (mặc định 600/phút/IP, cấu hình `SENTINELX_RATE_LIMIT_PER_MINUTE`)
   - *Xác nhận:* `test_rate_limit_returns_429`
-- [ ] GitHub Actions (`.github/workflows/ci.yml`): pytest SQLite + Postgres, ruff, mypy
+- [x] GitHub Actions (`.github/workflows/ci.yml`): pytest SQLite + Postgres, ruff, mypy
   - *Đã viết, YAML hợp lệ, chưa chạy trên GitHub.* Tick khi CI xanh trên PR
 
-## M2 — Migration và nguồn dữ liệu (nhánh `feat/m2-migrations-wazuh`)
-- [ ] Alembic + migration đầu tiên thay `create_all` — *Xác nhận:* `upgrade head` rồi `downgrade base` trên Postgres
-- [ ] Bảng `assets` (host, độ quan trọng) + khóa ngoại từ event
-- [ ] Bảng `detection_rules` (bật/tắt rule, đồng bộ metadata)
-- [ ] Sysmon event 3 (kết nối mạng), 12/13 (registry) — *Xác nhận:* fixture + test chuẩn hóa
-- [ ] Đầu vào Wazuh alert JSON — *Xác nhận:* fixture Wazuh mẫu, test chuẩn hóa
-- [ ] Cột `src_port`, `dst_ip`, `dst_port`, `registry_key` cho event
-- [ ] Cập nhật `docs/database-schema.md`
+## M2 — Migration và nguồn dữ liệu (nhánh `feat/m2-migrations-wazuh`) — XONG, chờ bạn review
+- [x] Alembic + migration `0001` thay `create_all`
+  - *Xác nhận:* `alembic upgrade head` → `downgrade base` → `upgrade head` + `alembic check` sạch trên Postgres 17; `test_migrations.py` so khớp migration với model (đã thử cố tình làm lệch schema, test phát hiện được); container Compose tự chạy migration khi khởi động
+- [x] Bảng `assets` (hostname duy nhất, criticality 1–5, mặc định 3) + `security_events.asset_id`; tạo tự động ở lần đầu thấy host — *Xác nhận:* `test_asset_created_once_per_host`, smoke test Compose
+- [x] Bảng `detection_rules` đồng bộ metadata từ code lúc khởi động, `enabled` do vận hành quyết định + `GET /api/v1/rules` — *Xác nhận:* `test_rules_listed_and_disabling_stops_alerts`
+- [x] Sysmon event 3 (kết nối mạng), 12/13 (registry) — *Xác nhận:* fixture `tests/fixtures/sysmon_*.json`, `test_sysmon_*`
+- [x] Đầu vào Wazuh alert JSON (`source: "wazuh"`, bọc Sysmon hoặc dòng sshd) — *Xác nhận:* `test_wazuh_*`, smoke test Compose (SX-002 kích hoạt qua Wazuh)
+- [x] Cột `src_port`, `dst_ip`, `dst_port`, `registry_key`, `registry_value` cho event
+- [x] Cập nhật `docs/database-schema.md`
+- [x] **Sửa lỗi M1 phát hiện thêm:** secret ở cuối giá trị trong JSON làm hỏng JSON → event Sysmon bị từ chối 422 (mất event). Nay parse JSON trước rồi mới che từng giá trị. *Xác nhận:* `test_secret_in_json_payload_is_redacted_and_event_accepted`
+- [ ] Công cụ đẩy alert Wazuh sang API (integration script) — *chưa làm*, hiện chỉ có định dạng nhận; cân nhắc ở M8/lab
 
 ## M3 — Bộ rule phát hiện (đủ 5–8 rule)
 - [ ] SX-003 Tạo tài khoản đáng ngờ

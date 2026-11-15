@@ -16,3 +16,11 @@
 **Not verified:** CI on GitHub (workflow only parsed as YAML); rate limit behind a reverse proxy (client IP would be the proxy's); throughput impact of the per-host lock.
 **Known shortcuts:** rate limit is in-memory, per process; SX-001 evidence can span up to 2x window; per-host lock serializes ingestion per host.
 **Next:** M2 on branch `feat/m2-migrations-wazuh`: Alembic first migration, `assets`, `detection_rules`, Sysmon 3/12/13, Wazuh input.
+
+## Session 3 — M2 (branch `feat/m2-migrations-wazuh`)
+**Done:** Alembic (`backend/alembic/`, migration `0001`); tables `assets`, `detection_rules`; event columns `asset_id`, `src_port`, `dst_ip`, `dst_port`, `registry_key`, `registry_value`; Sysmon events 3/12/13; Wazuh transport (`source: "wazuh"` wrapping a Sysmon record or sshd line, normalized `source` stays `sysmon`/`linux_auth` so existing rules apply); rule sync at startup + `GET /api/v1/rules`; container runs migrations on start; fixtures in `backend/tests/fixtures/`.
+**Bug fixed (existed since M1):** redaction ran on the raw JSON text, so a secret at the end of a value broke the JSON and the event was rejected with 422. Redaction now happens per value after parsing; dedup hash is over canonical redacted JSON (key order no longer matters).
+**Verified (run):** 28 passed + 1 skipped on SQLite, 29 passed on PostgreSQL 17 (3 runs); ruff and mypy clean; `alembic upgrade/downgrade/upgrade/check` on Postgres; Compose smoke test (migration on start, rules listed, Sysmon 3/13, Wazuh PowerShell raises SX-002, 2 assets created).
+**Not verified:** real Wazuh output (fixtures follow the documented alert shape but were hand-written); CI run on GitHub for this branch; upgrade path from a database created by the M1 `create_all` (documented as reset with `down -v`).
+**Known shortcuts:** no endpoint to toggle rules (flip `detection_rules.enabled` in SQL; no audit log until M6); Sysmon `Initiated` flag ignored for network events; same event sent directly and via Wazuh is not deduplicated across transports; no Wazuh integration script to push alerts yet.
+**Next:** M3 rules SX-003..SX-008 with benign/malicious fixtures; alert dedup by time window.

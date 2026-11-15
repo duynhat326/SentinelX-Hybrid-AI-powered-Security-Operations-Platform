@@ -22,6 +22,7 @@ def client(tmp_path, monkeypatch):
     ratelimit.reset()
     session._engine = session._factory = None
     Base.metadata.drop_all(session.get_engine())
+    Base.metadata.create_all(session.get_engine())
     from app.api.main import app
 
     with TestClient(app, headers={"X-API-Key": KEY}) as c:

@@ -12,8 +12,9 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api.ratelimit import rate_limit
 from app.core.config import Settings, get_settings
-from app.database.models import Alert, Base
-from app.database.session import get_db, get_engine
+from app.database.models import Alert, DetectionRule
+from app.database.session import get_db, get_factory
+from app.detection.engine import sync_rules
 from app.ingestion.service import ingest
 from app.normalization.normalize import NormalizationError
 
@@ -34,8 +35,8 @@ class SecureHeaders(BaseHTTPMiddleware):
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     get_settings()  # fail fast on bad config
-    # shortcut: create_all instead of Alembic migrations, add Alembic in Milestone 2.
-    Base.metadata.create_all(get_engine())
+    with get_factory()() as db:  # schema comes from `alembic upgrade head`, run before the app starts
+        sync_rules(db)
     yield
 
 
@@ -49,7 +50,7 @@ app.add_middleware(CORSMiddleware, allow_origins=_origins, allow_methods=["GET",
 
 
 class EventIn(BaseModel):
-    source: Literal["linux_auth", "sysmon"]
+    source: Literal["linux_auth", "sysmon", "wazuh"]
     payload: str = Field(min_length=1, max_length=16384)
 
 
@@ -95,3 +96,17 @@ def post_event(body: EventIn, db: Session = Depends(get_db), cfg: Settings = Dep
 def list_alerts(db: Session = Depends(get_db), limit: int = Query(50, ge=1, le=200)) -> list[AlertOut]:
     rows = db.scalars(select(Alert).order_by(Alert.created_at.desc()).limit(limit))
     return [_alert_out(a) for a in rows]
+
+
+class RuleOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    title: str
+    severity: str
+    mitre: list[str]
+    enabled: bool
+
+
+@app.get("/api/v1/rules", response_model=list[RuleOut], dependencies=[Depends(require_key)])
+def list_rules(db: Session = Depends(get_db)) -> list[DetectionRule]:
+    return list(db.scalars(select(DetectionRule).order_by(DetectionRule.id)))

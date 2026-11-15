@@ -70,3 +70,14 @@ def test_rate_limit_returns_429(client, monkeypatch):
     codes = [client.post("/api/v1/events", json=ssh_fail(n)).status_code for n in range(1, 6)]
     assert codes == [200, 200, 200, 429, 429]
     assert client.get("/api/v1/alerts").status_code == 200  # reads are not limited
+
+
+def test_secret_in_json_payload_is_redacted_and_event_accepted(client):
+    from app.database.models import SecurityEvent
+    from app.database.session import get_factory
+
+    r = client.post("/api/v1/events", json=sysmon_ps("tool.exe password=hunter2", "2026-11-15 10:09:00.000"))
+    assert r.status_code == 200, r.text
+    with get_factory()() as db:
+        ev = db.query(SecurityEvent).one()
+        assert "hunter2" not in str(ev.raw) and "hunter2" not in (ev.command_line or "")

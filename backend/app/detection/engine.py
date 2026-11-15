@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
-from app.database.models import Alert, AlertEvent, SecurityEvent
+from app.database.models import Alert, AlertEvent, DetectionRule, SecurityEvent
 
 
 def _utc(d: datetime) -> datetime:
@@ -70,10 +70,23 @@ RULES: list[Rule] = [
 ]
 
 
+def sync_rules(db: Session) -> None:
+    """Mirror code-defined rule metadata into detection_rules. `enabled` is operator state: set from
+    the code default only when the row is first created, never overwritten afterwards."""
+    for r in RULES:
+        row = db.get(DetectionRule, r.id)
+        if row is None:
+            db.add(DetectionRule(id=r.id, title=r.title, severity=r.severity, mitre=r.mitre, enabled=r.enabled))
+        else:
+            row.title, row.severity, row.mitre = r.title, r.severity, r.mitre
+    db.commit()
+
+
 def run_detections(db: Session, ev: SecurityEvent, cfg: Settings, rules: list[Rule] | None = None) -> list[Alert]:
     out: list[Alert] = []
+    disabled = set(db.scalars(select(DetectionRule.id).where(DetectionRule.enabled.is_(False))))
     for rule in rules if rules is not None else RULES:
-        if not rule.enabled or not (m := rule.check(db, ev, cfg)):
+        if not rule.enabled or rule.id in disabled or not (m := rule.check(db, ev, cfg)):
             continue
         key, evidence = m
         alert = db.scalar(select(Alert).where(Alert.rule_id == rule.id, Alert.host == ev.host, Alert.group_key == key))
