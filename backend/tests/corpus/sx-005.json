@@ -1,0 +1,262 @@
+{
+ "rule": "SX-005",
+ "description": "Synthetic labeled cases. A regression corpus, not a real-world evaluation.",
+ "cases": [
+  {
+   "id": "SX-005-m01",
+   "rule": "SX-005",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "HKCU Run value",
+   "events": [
+    {
+     "k": "r",
+     "img": "reg.exe",
+     "key": "HKU\\S-1-5-21-1\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\Updater",
+     "val": "C:\\Users\\lab\\payload.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-m02",
+   "rule": "SX-005",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "HKLM Run value",
+   "events": [
+    {
+     "k": "r",
+     "img": "reg.exe",
+     "key": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run\\Backdoor",
+     "val": "C:\\Users\\lab\\payload.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-m03",
+   "rule": "SX-005",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "RunOnce value",
+   "events": [
+    {
+     "k": "r",
+     "img": "reg.exe",
+     "key": "HKU\\S-1-5-21-1\\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce\\Setup",
+     "val": "C:\\Users\\lab\\payload.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-m04",
+   "rule": "SX-005",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Wow6432Node Run value",
+   "events": [
+    {
+     "k": "r",
+     "img": "reg.exe",
+     "key": "HKLM\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Run\\x",
+     "val": "C:\\Users\\lab\\payload.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-m05",
+   "rule": "SX-005",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Policies Explorer Run",
+   "events": [
+    {
+     "k": "r",
+     "img": "reg.exe",
+     "key": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\Explorer\\Run\\x",
+     "val": "C:\\Users\\lab\\payload.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-m06",
+   "rule": "SX-005",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "RunOnceEx value",
+   "events": [
+    {
+     "k": "r",
+     "img": "reg.exe",
+     "key": "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnceEx\\0001",
+     "val": "C:\\Users\\lab\\payload.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-m07",
+   "rule": "SX-005",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "written by PowerShell",
+   "events": [
+    {
+     "k": "r",
+     "img": "powershell.exe",
+     "key": "HKU\\S-1-5-21-1\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\SentinelXTest",
+     "val": "C:\\Windows\\System32\\notepad.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-m08",
+   "rule": "SX-005",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "upper-case path",
+   "events": [
+    {
+     "k": "r",
+     "img": "reg.exe",
+     "key": "HKU\\S-1-5-21-1\\SOFTWARE\\MICROSOFT\\WINDOWS\\CURRENTVERSION\\RUN\\UPD",
+     "val": "C:\\Users\\lab\\payload.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-m09",
+   "rule": "SX-005",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "Winlogon Userinit hijack",
+   "events": [
+    {
+     "k": "r",
+     "img": "reg.exe",
+     "key": "HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Winlogon\\Userinit",
+     "val": "C:\\Windows\\system32\\userinit.exe,C:\\x.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-b01",
+   "rule": "SX-005",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Explorer Advanced setting",
+   "events": [
+    {
+     "k": "r",
+     "img": "explorer.exe",
+     "key": "HKU\\S-1-5-21-1\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\Start_ShowRun",
+     "val": "1"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-b02",
+   "rule": "SX-005",
+   "label": "benign",
+   "synthetic": true,
+   "note": "RunServices (not a Run key)",
+   "events": [
+    {
+     "k": "r",
+     "img": "reg.exe",
+     "key": "HKU\\S-1-5-21-1\\Software\\Microsoft\\Windows\\CurrentVersion\\RunServices\\x",
+     "val": "C:\\Users\\lab\\payload.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-b03",
+   "rule": "SX-005",
+   "label": "benign",
+   "synthetic": true,
+   "note": "vendor key named Run without CurrentVersion",
+   "events": [
+    {
+     "k": "r",
+     "img": "setup.exe",
+     "key": "HKLM\\SOFTWARE\\Vendor\\Run\\opt",
+     "val": "C:\\Users\\lab\\payload.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-b04",
+   "rule": "SX-005",
+   "label": "benign",
+   "synthetic": true,
+   "note": "CreateKey on the Run key",
+   "events": [
+    {
+     "k": "r12",
+     "img": "reg.exe",
+     "key": "HKU\\S-1-5-21-1\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+     "type": "CreateKey"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-b05",
+   "rule": "SX-005",
+   "label": "benign",
+   "synthetic": true,
+   "note": "DeleteKey on the Run key",
+   "events": [
+    {
+     "k": "r12",
+     "img": "reg.exe",
+     "key": "HKU\\S-1-5-21-1\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+     "type": "DeleteKey"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-b06",
+   "rule": "SX-005",
+   "label": "benign",
+   "synthetic": true,
+   "note": "service Start value",
+   "events": [
+    {
+     "k": "r",
+     "img": "services.exe",
+     "key": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\x\\Start",
+     "val": "2"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-b07",
+   "rule": "SX-005",
+   "label": "benign",
+   "synthetic": true,
+   "note": "RecentDocs value",
+   "events": [
+    {
+     "k": "r",
+     "img": "explorer.exe",
+     "key": "HKU\\S-1-5-21-1\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RecentDocs\\a",
+     "val": "x"
+    }
+   ]
+  },
+  {
+   "id": "SX-005-b08",
+   "rule": "SX-005",
+   "label": "benign",
+   "synthetic": true,
+   "note": "RunMRU (Run dialog history)",
+   "events": [
+    {
+     "k": "r",
+     "img": "explorer.exe",
+     "key": "HKU\\S-1-5-21-1\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\RunMRU\\a",
+     "val": "cmd\\1"
+    }
+   ]
+  }
+ ]
+}

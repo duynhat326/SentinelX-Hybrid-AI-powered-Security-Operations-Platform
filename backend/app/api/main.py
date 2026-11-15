@@ -1,6 +1,7 @@
 import hmac
 import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import Annotated, Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
@@ -64,11 +65,14 @@ class AlertOut(BaseModel):
     host: str
     mitre: list[str]
     event_count: int
+    first_event_at: datetime
+    last_event_at: datetime
     evidence_event_ids: list[uuid.UUID]
 
 
 def _alert_out(a: Alert) -> AlertOut:
-    return AlertOut(**{k: getattr(a, k) for k in ("id", "rule_id", "title", "severity", "status", "host", "mitre", "event_count")},
+    return AlertOut(**{k: getattr(a, k) for k in ("id", "rule_id", "title", "severity", "status", "host", "mitre", "event_count",
+                                                  "first_event_at", "last_event_at")},
                     evidence_event_ids=[e.event_id for e in a.evidence])
 
 

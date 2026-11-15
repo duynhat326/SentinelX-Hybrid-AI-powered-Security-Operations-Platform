@@ -27,10 +27,18 @@ The backend container runs `alembic upgrade head` before starting. If you ran an
 | GET | `/api/v1/alerts` | newest alerts with evidence event IDs |
 | GET | `/api/v1/rules` | detection rules and their enabled state |
 
-## Detection rules (M1)
+## Detection rules
 | ID | Rule | MITRE |
 |---|---|---|
 | SX-001 | ≥N failed SSH logins from one IP/host in a window (default 5 in 300 s) | T1110 |
 | SX-002 | PowerShell with encoded command / download-cradle / hidden-window flags | T1059.001 |
+| SX-003 | Local account created from the command line | T1136.001 |
+| SX-004 | Account added to the local Administrators group | T1098 |
+| SX-005 | Registry Run key persistence | T1547.001 |
+| SX-006 | Script host or LOLBin connecting to an external address | T1071 |
+| SX-007 | Office application spawning a shell or script host | T1204.002 |
+| SX-008 | Repeated SSH failures followed by a successful login | T1110, T1078 |
+
+Details, false positives and known gaps: [docs/detection-rules.md](docs/detection-rules.md).
 
 Plan: [docs/implementation-plan.md](docs/implementation-plan.md). Third-party: FastAPI, SQLAlchemy, Pydantic, PostgreSQL. All SentinelX code is original. License: MIT.

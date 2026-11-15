@@ -1,6 +1,6 @@
 # Database schema
 
-PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0001`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
+PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0002`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
 
 ```mermaid
 erDiagram
@@ -54,6 +54,8 @@ erDiagram
         string group_key "e.g. src_ip or event id"
         jsonb mitre "technique ids"
         int event_count
+        timestamptz first_event_at "earliest evidence event"
+        timestamptz last_event_at "latest evidence event"
         timestamptz created_at "indexed"
     }
     alert_events {
@@ -66,7 +68,7 @@ erDiagram
 | Table | Constraint | Purpose |
 |---|---|---|
 | `security_events` | unique `dedup_hash` | idempotent ingestion |
-| `alerts` | unique `(rule_id, host, group_key)` | one alert per rule, host and group; later events attach evidence |
+| `alerts` | non-unique index `(rule_id, host, group_key)` | an alert absorbs matching events inside the merge window; a later match opens a new alert (per-host ingestion lock prevents concurrent duplicates) |
 | `assets` | unique `hostname`, CHECK `criticality BETWEEN 1 AND 5` | one asset per host, valid criticality for the risk engine |
 | `security_events` | FK `asset_id` to `assets` (`ON DELETE RESTRICT`) | an asset with events cannot be deleted |
 | `alert_events` | composite PK, FK to `alerts` (`ON DELETE CASCADE`), FK to `security_events` (`ON DELETE RESTRICT`) | evidence can never silently lose its event |

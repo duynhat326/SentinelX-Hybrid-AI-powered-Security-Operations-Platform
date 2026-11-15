@@ -24,3 +24,12 @@
 **Not verified:** real Wazuh output (fixtures follow the documented alert shape but were hand-written); CI run on GitHub for this branch; upgrade path from a database created by the M1 `create_all` (documented as reset with `down -v`).
 **Known shortcuts:** no endpoint to toggle rules (flip `detection_rules.enabled` in SQL; no audit log until M6); Sysmon `Initiated` flag ignored for network events; same event sent directly and via Wazuh is not deduplicated across transports; no Wazuh integration script to push alerts yet.
 **Next:** M3 rules SX-003..SX-008 with benign/malicious fixtures; alert dedup by time window.
+
+## Session 4 — M3 (branch `feat/m3-detection-rules`)
+**Done:** rules SX-003..SX-008 (account creation, Administrators group add, Run key persistence, LOLBin external connection, Office spawning a shell, failures-then-success); alert merging by time window with `first_event_at`/`last_event_at` (migration `0002`, backfills existing alerts from evidence); `docs/detection-rules.md`; labeled corpus of 149 synthetic cases (`backend/tests/corpus/`, runner in `tests/corpus_runner.py`); `first_event_at`/`last_event_at` in the alerts API.
+**Bug found by the corpus before it shipped:** SX-006 treated multicast addresses as external (`ipaddress.is_global` is true for 224.0.0.251). Fixed.
+**Verified (run):** 35 passed + 1 skipped on SQLite, 36 passed on PostgreSQL 17 (3 runs); ruff and mypy clean; Compose build runs migrations to `0002`; six new rules fire over HTTP and a benign multicast case does not.
+**Corpus results (synthetic, same author as the rules, NOT an evaluation):** precision 1.00 for every rule; recall 0.75-0.91 because 13 cases are deliberate known gaps. Real evaluation is Milestone 8.
+**Not verified:** any rule on real Windows or Linux telemetry; false-positive rate in a real environment; the 0001 to 0002 upgrade on a Compose volume with real data (covered only by the backfill test); CI for this branch.
+**Known shortcuts:** one merge window (the brute-force window) for all rules; SX-001 evidence can span up to 2x window; no API to toggle rules; the corpus generator script is not in the repo (the JSON files are the source of truth); SX-006 ignores direction (Sysmon `Initiated`).
+**Next:** M4: correlation into incidents and timelines (SX-001 + SX-008 should become one incident), risk engine 0-100.
