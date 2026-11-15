@@ -17,13 +17,15 @@ SENTINELX_TEST_DATABASE_URL=postgresql+psycopg://user:pass@localhost:5432/db uv 
 cp .env.example .env   # fill in SENTINELX_API_KEY and POSTGRES_PASSWORD
 docker compose up --build
 ```
+The backend container runs `alembic upgrade head` before starting. If you ran an older build whose tables were created without Alembic (or changed `POSTGRES_PASSWORD` after the first run), reset the volume with `docker compose down -v` (this deletes the database).
 
 ## API (header `X-API-Key` required except `/health`)
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/health` | liveness |
-| POST | `/api/v1/events` | body `{"source": "linux_auth"\|"sysmon", "payload": "<raw line or Sysmon EventID 1 JSON>"}` |
+| POST | `/api/v1/events` | body `{"source": "linux_auth"\|"sysmon"\|"wazuh", "payload": "<sshd line, Sysmon EventID 1/3/12/13 JSON, or a Wazuh alert JSON wrapping one of those>"}` |
 | GET | `/api/v1/alerts` | newest alerts with evidence event IDs |
+| GET | `/api/v1/rules` | detection rules and their enabled state |
 
 ## Detection rules (M1)
 | ID | Rule | MITRE |

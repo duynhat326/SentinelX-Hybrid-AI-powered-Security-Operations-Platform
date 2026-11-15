@@ -1,0 +1,1 @@
+{"EventID": 13, "UtcTime": "2026-11-15 10:12:00.000", "Computer": "win10-lab", "User": "LAB\\alice", "Image": "C:\\Windows\\System32\\reg.exe", "EventType": "SetValue", "TargetObject": "HKU\\S-1-5-21-1\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\\SentinelXTest", "Details": "C:\\Windows\\System32\\notepad.exe"}
