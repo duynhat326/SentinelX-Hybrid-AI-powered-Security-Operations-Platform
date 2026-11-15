@@ -125,3 +125,18 @@ class IncidentEntity(Base):
     incident_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("incidents.id", ondelete="CASCADE"), primary_key=True)
     kind: Mapped[str] = mapped_column(String(16), primary_key=True)  # host | ip | user | process
     value: Mapped[str] = mapped_column(String(512), primary_key=True)
+
+
+class AgentRun(Base):
+    """One AI investigation of an incident. Advisory only: nothing here feeds severity, risk or any action."""
+
+    __tablename__ = "agent_runs"
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    incident_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("incidents.id", ondelete="CASCADE"), index=True)
+    status: Mapped[str] = mapped_column(String(16))  # ok | failed
+    provider: Mapped[str] = mapped_column(String(32))
+    output: Mapped[dict | None] = mapped_column(JsonType, nullable=True)  # validated, cited claims only
+    dropped_claims: Mapped[int] = mapped_column(Integer, default=0)  # claims without valid evidence citations
+    rejected_tool_calls: Mapped[list] = mapped_column(JsonType, default=list)  # audit of refused tool calls
+    error: Mapped[str | None] = mapped_column(String(600), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)

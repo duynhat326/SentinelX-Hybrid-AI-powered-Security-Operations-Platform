@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -22,6 +23,8 @@ class Settings(BaseSettings):
     risk_weight_correlation: float = Field(default=0.3, ge=0)
     risk_weight_threat_intel: float = Field(default=0.2, ge=0)
     risk_weight_asset: float = Field(default=0.1, ge=0)
+    llm_provider: Literal["none", "mock"] = "none"  # none = AI off; detection and scoring never depend on it
+    llm_max_prompt_chars: int = Field(default=12000, ge=2000)
     cors_origins: list[str] = []
 
     @model_validator(mode="after")

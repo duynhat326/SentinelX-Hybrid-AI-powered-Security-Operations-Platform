@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.api.agents import router as agents_router
 from app.api.auth import require_key
 from app.api.incidents import router as incidents_router
 from app.api.ratelimit import rate_limit
@@ -42,6 +43,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="SentinelX", version="0.1.0", lifespan=lifespan)
 app.add_middleware(SecureHeaders)
 app.include_router(incidents_router)
+app.include_router(agents_router)
 try:
     _origins = get_settings().cors_origins
 except Exception:  # settings are validated again in lifespan; keep import-time safe for tooling
