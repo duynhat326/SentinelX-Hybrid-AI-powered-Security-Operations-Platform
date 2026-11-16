@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     llm_max_prompt_chars: int = Field(default=12000, ge=2000)
     llm_timeout_seconds: float = Field(default=30, gt=0, le=300)  # passed to the provider for each call
     llm_rate_limit_per_minute: int = Field(default=10, ge=1)  # per client IP; each run is two model calls
+    token_ttl_minutes: int = Field(default=480, ge=5, le=10080)  # bearer session lifetime
+    login_rate_limit_per_minute: int = Field(default=10, ge=1)  # per client IP
     cors_origins: list[str] = []
 
     @model_validator(mode="after")

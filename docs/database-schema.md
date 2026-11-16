@@ -1,6 +1,6 @@
 # Database schema
 
-PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0006`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
+PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0007`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
 
 ```mermaid
 erDiagram
@@ -11,6 +11,7 @@ erDiagram
     alerts ||--o| incident_alerts : "belongs to at most one"
     incidents ||--o{ incident_entities : "involves"
     incidents ||--o{ agent_runs : "investigated by"
+    users ||--o{ auth_tokens : "has sessions"
 
     assets {
         uuid id PK
@@ -89,6 +90,34 @@ erDiagram
         string kind PK "host | ip | user | process"
         string value PK
     }
+    users {
+        uuid id PK
+        string username UK "3-64 of a-z 0-9 . _ -"
+        string password_hash "scrypt, parameters inside the string"
+        string role "viewer | analyst | approver | admin, CHECK"
+        bool active
+        timestamptz created_at
+    }
+    auth_tokens {
+        uuid id PK
+        uuid user_id FK "indexed, ON DELETE CASCADE"
+        string token_sha256 UK "the token itself is never stored"
+        timestamptz expires_at "indexed"
+        bool revoked
+        timestamptz created_at
+    }
+    audit_logs {
+        uuid id PK
+        timestamptz ts "indexed"
+        string actor "user:alice | service:api-key | cli | anonymous, indexed"
+        string role
+        string action "auth.login, authz.denied, user.update, ... indexed"
+        string target_type
+        string target_id
+        string outcome "ok | denied | error, indexed"
+        string ip
+        jsonb detail "redacted, capped"
+    }
     agent_runs {
         uuid id PK
         uuid incident_id FK "indexed"
@@ -122,7 +151,7 @@ Events are never deleted by the application. No credentials or API tokens are st
 Incidents have no separate evidence table: the timeline is derived from `incident_alerts` and `alert_events` (see [correlation-and-risk.md](correlation-and-risk.md)). SQLite does not enforce `ON DELETE CASCADE` here, so the application deletes dependent rows explicitly when merging incidents.
 
 ## Planned tables (not created yet)
-`users`, `roles`, `response_actions`, `audit_logs`, `iocs` (M6).
+`iocs` (M6B), `response_actions`, `blocklist_entries` (M6C). Roles are not a table: they are fixed in code (`app/api/auth.py`) and named by `users.role`.
 
 ## Migration workflow
 Alembic reads `SENTINELX_DATABASE_URL` directly (no API key needed).

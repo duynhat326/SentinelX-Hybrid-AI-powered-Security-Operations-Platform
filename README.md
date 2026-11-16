@@ -12,6 +12,14 @@ cd backend && uv sync && uv run pytest -q
 SENTINELX_TEST_DATABASE_URL=postgresql+psycopg://user:pass@localhost:5432/db uv run pytest -q
 ```
 
+## Sign in
+People use a bearer token; collectors keep using `X-API-Key`. Create the first admin from the host, then log in:
+```bash
+docker compose exec backend .venv/bin/python -m app.manage create-user alice admin
+curl -s localhost:8000/api/v1/auth/login -H 'content-type: application/json' -d '{"username":"alice","password":"..."}'
+```
+Roles and what each may do: [docs/security-model.md](docs/security-model.md).
+
 ## Run with Docker Compose
 ```bash
 cp .env.example .env   # fill in SENTINELX_API_KEY and POSTGRES_PASSWORD
@@ -19,13 +27,16 @@ docker compose up --build
 ```
 The backend container runs `alembic upgrade head` before starting. If you ran an older build whose tables were created without Alembic (or changed `POSTGRES_PASSWORD` after the first run), reset the volume with `docker compose down -v` (this deletes the database).
 
-## API (header `X-API-Key` required except `/health`)
+## API (`Authorization: Bearer <token>` or `X-API-Key`, see the role table; only `/health` and login are public)
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/health` | liveness |
 | POST | `/api/v1/events` | body `{"source": "linux_auth"\|"sysmon"\|"wazuh", "payload": "<sshd line, Sysmon EventID 1/3/12/13 JSON, or a Wazuh alert JSON wrapping one of those>"}` |
 | GET | `/api/v1/alerts` | newest alerts with evidence event IDs |
 | GET | `/api/v1/rules` | detection rules and their enabled state |
+| POST | `/api/v1/auth/login`, `/logout` | sign in (public, rate limited) and out; `GET /api/v1/auth/me` shows the caller |
+| POST/GET/PATCH | `/api/v1/users` | admin only: create, list, change role or disable |
+| GET | `/api/v1/audit-logs` | admin only: who did what (filters `action`, `actor`, `outcome`) |
 | GET | `/api/v1/incidents` | incidents ordered by risk (filters: `status`, `min_risk`, `limit`) |
 | GET | `/api/v1/incidents/{id}` | risk breakdown, entities, alerts with grouping reason, evidence timeline |
 | POST | `/api/v1/incidents/{id}/investigate` | run AI triage + investigation (needs `SENTINELX_LLM_PROVIDER=mock`; 503 when `none`; limited to 10 runs per minute per IP) |
