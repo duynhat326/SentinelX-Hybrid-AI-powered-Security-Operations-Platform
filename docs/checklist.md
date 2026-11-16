@@ -91,12 +91,24 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [ ] Adapter LLM thật (Ollama hoặc API) — cần khi muốn dùng thật; phải tự áp `timeout`, và cân nhắc cảnh báo riêng tư khi gửi dữ liệu ra ngoài
 - [ ] Đánh giá chất lượng AI (evidence accuracy, hallucination) với dữ liệu lab — thuộc M8; hiện chỉ kiểm tra được *id có tồn tại*, chưa kiểm tra *câu có đúng*
 
-## M6 - Threat intel, phản ứng, phân quyền
-- [ ] RBAC: bảng users/roles, đăng nhập, thay API key chung
-- [ ] `audit_logs` cho mọi thao tác nhạy cảm
+## M6 - Threat intel, phản ứng, phân quyền (làm theo 3 lát cắt, mỗi lát một PR)
+
+### 6A - RBAC và audit log — XONG, chờ bạn review (nhánh `feat/m6a-rbac-audit`)
+- [x] RBAC: bảng `users`, `auth_tokens`, 4 vai trò cố định (viewer, analyst, approver, admin) + vai trò `service` cho API key dùng chung; đăng nhập bằng mật khẩu (scrypt) ra bearer token chỉ lưu hash. *Xác nhận:* `tests/test_auth.py` (14 test)
+  - API key dùng chung **vẫn còn** cho collector (`ingest`) và client cũ nhưng không thể đề xuất/duyệt/quản trị; người dùng đăng nhập bằng token. Chưa "thay hẳn" key vì collector cần một credential máy
+- [x] Tạo admin đầu tiên bằng CLI (`python -m app.manage create-user`), mật khẩu không nằm trên dòng lệnh
+- [x] **Mỗi route khai báo quyền cần có**; test chạy *mọi route* với *mọi loại người gọi* (ẩn danh, token sai, service, 4 vai trò) và fail nếu có route thiếu khai báo. *Xác nhận:* `tests/test_authz_matrix.py`; đã thử phá 5 chỗ (bỏ check quyền, không commit audit, thêm route không khai báo, bearer sai rơi về API key, cấp thừa quyền) và test fail mỗi lần
+- [x] `audit_logs`: đăng nhập thành công/thất bại, đăng xuất, tạo/sửa user, **mọi lần bị từ chối quyền của người đã xác thực** (khớp 100% trong test ma trận), mỗi lần chạy AI investigate; không có route nào sửa/xóa audit
+- [x] Mật khẩu/token không bao giờ vào audit hay response — *Xác nhận:* `test_passwords_and_tokens_never_reach_audit_logs_or_responses`
+- [ ] Audit log của **hành động phản ứng** — thuộc lát 6C
+- [ ] *Chưa làm (ghi trong `docs/security-model.md`):* audit bất biến ở mức database, khóa tài khoản, đổi mật khẩu qua API, MFA
+
+### 6B - Threat intel — chưa làm
 - [ ] Bảng IOC cục bộ + cache
 - [ ] Adapter VirusTotal / AbuseIPDB (tùy chọn): timeout, rate limit, cảnh báo riêng tư trước khi gửi ngoài, không bịa dữ liệu
-- [ ] Threat Intel Agent
+- [ ] Threat Intel Agent; đưa điểm TI vào risk score
+
+### 6C - Phản ứng có duyệt — chưa làm
 - [ ] Response Agent chỉ **đề xuất** (kiểu dữ liệu chặt, allowlist hành động), mặc định dry-run
 - [ ] Luồng duyệt: người duyệt + kiểm tra quyền + idempotency + audit + hướng dẫn rollback
 - [ ] Test: chặn hành động trái phép đạt 100%, audit đủ 100% hành động phản ứng

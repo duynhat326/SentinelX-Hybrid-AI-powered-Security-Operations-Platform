@@ -154,13 +154,13 @@ def normalize_wazuh(alert: dict, max_raw: int) -> tuple[NormalizedEvent, dict]:
     raise NormalizationError("wazuh alert has neither data.win nor full_log")
 
 
-def _redact_obj(o: Any) -> Any:
+def redact_obj(o: Any) -> Any:
     if isinstance(o, str):
         return redact(o)
     if isinstance(o, dict):
-        return {k: _redact_obj(v) for k, v in o.items()}
+        return {k: redact_obj(v) for k, v in o.items()}
     if isinstance(o, list):
-        return [_redact_obj(v) for v in o]
+        return [redact_obj(v) for v in o]
     return o
 
 
@@ -177,7 +177,7 @@ def prepare(source: str, payload: str, max_raw: int, now: datetime | None = None
         raise NormalizationError(f"{source} payload is not JSON") from e
     if not isinstance(rec, dict):
         raise NormalizationError(f"{source} payload must be an object")
-    rec = _redact_obj(rec)  # redact values after parsing: redacting the raw JSON text can break the JSON
+    rec = redact_obj(rec)  # redact values after parsing: redacting the raw JSON text can break the JSON
     if source == "sysmon":
         ev, raw = normalize_sysmon(rec), {"record": {k: str(v)[:max_raw] for k, v in rec.items()}}
     else:

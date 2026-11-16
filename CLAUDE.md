@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-SentinelX: an analyst-assistance mini-SOC. Everything built so far (Milestone 5) is a Python backend: ingest → normalize → store → detect → alert → correlate into incidents → risk score, all deterministic, plus an *advisory* AI investigation of incidents (LangGraph, Triage → Investigation) that runs only with a mock LLM and is off by default. No real LLM adapter, dashboard or response workflow exists yet (see `docs/checklist.md`). Keep detection, scoring and authorization deterministic; the LLM may only explain evidence, never change severity, scores or permissions (`docs/ai-investigation.md`).
+SentinelX: an analyst-assistance mini-SOC. Everything built so far (Milestone 5) is a Python backend: ingest → normalize → store → detect → alert → correlate into incidents → risk score, all deterministic, plus an *advisory* AI investigation of incidents (LangGraph, Triage → Investigation) that runs only with a mock LLM and is off by default. No real LLM adapter, dashboard or response workflow exists yet (see `docs/checklist.md`). Keep detection, scoring and authorization deterministic; the LLM may only explain evidence, never change severity, scores or permissions (`docs/ai-investigation.md`). Authorization is role-based (`docs/security-model.md`): a new route must declare `Depends(require("<permission>"))` and get a row in `tests/test_authz_matrix.py`, which fails otherwise.
 
 All code lives in `backend/` (Python ≥3.12, FastAPI, SQLAlchemy 2, Alembic, `uv`). `detection-rules/custom/` and `lab/scenarios/` are empty placeholders.
 
@@ -29,7 +29,7 @@ Full stack: `cp .env.example .env` (set `SENTINELX_API_KEY`, `POSTGRES_PASSWORD`
 
 Pipeline, one module per stage under `backend/app/`:
 
-- `api/` – `main.py` (routes, security headers, CORS), `auth.py` (API-key auth via `X-API-Key`), `ratelimit.py` (in-memory per-IP, named buckets: events and a stricter `llm` one), `incidents.py`, `agents.py` (investigate and agent-runs endpoints).
+- `api/` – `main.py` (routes, security headers, CORS), `auth.py` (principals and role permissions: bearer tokens for people, `X-API-Key` as the narrow `service` role), `users.py` (login, users, audit read), `audit.py`, `ratelimit.py` (in-memory per-IP, named buckets: events and a stricter `llm` one), `incidents.py`, `agents.py` (investigate and agent-runs endpoints).
 - `normalization/normalize.py` – parses `linux_auth` (sshd lines), `sysmon` (EventID 1/3/12/13 JSON) and `wazuh` (wrapper around either) into one event shape, redacts secrets, computes the SHA-256 dedup hash of the redacted raw record.
 - `ingestion/service.py` – orchestrates a `POST /api/v1/events`: insert event (unique hash → duplicate is a no-op), run detections, correlate.
 - `detection/engine.py` – rules SX-001…SX-008 are Python callables with metadata in a `RULES` list; metadata is synced into the `detection_rules` table at startup (the sync never overwrites `enabled`). Alerts are keyed by `(rule_id, host, group_key)` and merge within a time window. SX-001/SX-008 look ± window around the event so out-of-order logs still work.

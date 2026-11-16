@@ -2,20 +2,21 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.agents.investigate import investigate
 from app.agents.llm import LLM, get_llm
-from app.api.auth import require_key
+from app.api.audit import audit
+from app.api.auth import Principal, current_principal, require
 from app.api.ratelimit import llm_rate_limit
 from app.core.config import Settings, get_settings
 from app.database.models import AgentRun, Incident
 from app.database.session import get_db
 
-router = APIRouter(prefix="/api/v1/incidents", dependencies=[Depends(require_key)])
+router = APIRouter(prefix="/api/v1/incidents", dependencies=[Depends(require("read"))])
 
 
 class AgentRunOut(BaseModel):
@@ -35,12 +36,16 @@ class AgentRunOut(BaseModel):
     created_at: datetime
 
 
-@router.post("/{incident_id}/investigate", response_model=AgentRunOut, dependencies=[Depends(llm_rate_limit)])
-def run_investigation(incident_id: uuid.UUID, db: Session = Depends(get_db), cfg: Settings = Depends(get_settings),
-                      llm: LLM | None = Depends(get_llm)) -> AgentRun:
+@router.post("/{incident_id}/investigate", response_model=AgentRunOut, dependencies=[Depends(require("investigate")), Depends(llm_rate_limit)])
+def run_investigation(incident_id: uuid.UUID, request: Request, who: Principal = Depends(current_principal), db: Session = Depends(get_db),
+                      cfg: Settings = Depends(get_settings), llm: LLM | None = Depends(get_llm)) -> AgentRun:
     if llm is None:
         raise HTTPException(503, "AI investigation is disabled (SENTINELX_LLM_PROVIDER=none)")
-    return investigate(db, cfg, llm, incident_id)
+    run = investigate(db, cfg, llm, incident_id)
+    audit(db, who, "agent.investigate", target_type="incident", target_id=str(incident_id),
+          detail={"run_id": str(run.id), "status": run.status, "provider": run.provider}, request=request)
+    db.commit()
+    return run
 
 
 @router.get("/{incident_id}/agent-runs", response_model=list[AgentRunOut])

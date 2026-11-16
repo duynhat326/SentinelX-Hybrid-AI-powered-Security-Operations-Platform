@@ -8,11 +8,11 @@ from pydantic import BaseModel
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.api.auth import require_key
+from app.api.auth import require
 from app.database.models import Alert, AlertEvent, Incident, IncidentAlert, IncidentEntity, SecurityEvent
 from app.database.session import get_db
 
-router = APIRouter(prefix="/api/v1/incidents", dependencies=[Depends(require_key)])
+router = APIRouter(prefix="/api/v1/incidents", dependencies=[Depends(require("read"))])
 
 
 class IncidentSummary(BaseModel):

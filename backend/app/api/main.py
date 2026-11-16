@@ -11,9 +11,10 @@ from sqlalchemy.orm import Session, selectinload
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.api.agents import router as agents_router
-from app.api.auth import require_key
+from app.api.auth import require
 from app.api.incidents import router as incidents_router
 from app.api.ratelimit import rate_limit
+from app.api.users import router as users_router
 from app.core.config import Settings, get_settings
 from app.correlation.engine import backfill
 from app.database.models import Alert, DetectionRule
@@ -44,6 +45,7 @@ app = FastAPI(title="SentinelX", version="0.1.0", lifespan=lifespan)
 app.add_middleware(SecureHeaders)
 app.include_router(incidents_router)
 app.include_router(agents_router)
+app.include_router(users_router)
 try:
     _origins = get_settings().cors_origins
 except Exception:  # settings are validated again in lifespan; keep import-time safe for tooling
@@ -90,7 +92,7 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/api/v1/events", response_model=IngestOut, dependencies=[Depends(require_key), Depends(rate_limit)])
+@app.post("/api/v1/events", response_model=IngestOut, dependencies=[Depends(require("ingest")), Depends(rate_limit)])
 def post_event(body: EventIn, db: Session = Depends(get_db), cfg: Settings = Depends(get_settings)) -> IngestOut:
     try:
         event, alerts = ingest(db, cfg, body.source, body.payload)
@@ -99,7 +101,7 @@ def post_event(body: EventIn, db: Session = Depends(get_db), cfg: Settings = Dep
     return IngestOut(event_id=event.id if event else None, duplicate=event is None, alerts=[_alert_out(a) for a in alerts])
 
 
-@app.get("/api/v1/alerts", response_model=list[AlertOut], dependencies=[Depends(require_key)])
+@app.get("/api/v1/alerts", response_model=list[AlertOut], dependencies=[Depends(require("read"))])
 def list_alerts(db: Session = Depends(get_db), limit: int = Query(50, ge=1, le=200)) -> list[AlertOut]:
     rows = db.scalars(select(Alert).options(selectinload(Alert.evidence), selectinload(Alert.incident_link))
                       .order_by(Alert.created_at.desc()).limit(limit))
@@ -115,6 +117,6 @@ class RuleOut(BaseModel):
     enabled: bool
 
 
-@app.get("/api/v1/rules", response_model=list[RuleOut], dependencies=[Depends(require_key)])
+@app.get("/api/v1/rules", response_model=list[RuleOut], dependencies=[Depends(require("read"))])
 def list_rules(db: Session = Depends(get_db)) -> list[DetectionRule]:
     return list(db.scalars(select(DetectionRule).order_by(DetectionRule.id)))

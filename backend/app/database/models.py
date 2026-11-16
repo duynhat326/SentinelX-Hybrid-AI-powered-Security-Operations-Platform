@@ -144,3 +144,47 @@ class AgentRun(Base):
     rejected_tool_calls: Mapped[list] = mapped_column(JsonType, default=list)  # audit of refused tool calls
     error: Mapped[str | None] = mapped_column(String(600), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+ROLES = ("viewer", "analyst", "approver", "admin")
+
+
+class User(Base):
+    """Roles are fixed in code (app/api/auth.py PERMISSIONS); the column only names one of them."""
+
+    __tablename__ = "users"
+    __table_args__ = (CheckConstraint("role IN ('viewer','analyst','approver','admin')", name="ck_user_role"),)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    username: Mapped[str] = mapped_column(String(64), unique=True)
+    password_hash: Mapped[str] = mapped_column(String(255))
+    role: Mapped[str] = mapped_column(String(16))
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class AuthToken(Base):
+    """Opaque bearer session. Only the sha256 of the token is stored."""
+
+    __tablename__ = "auth_tokens"
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    token_sha256: Mapped[str] = mapped_column(String(64), unique=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    revoked: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class AuditLog(Base):
+    """Append-only by convention: the application has no code path that updates or deletes a row."""
+
+    __tablename__ = "audit_logs"
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    ts: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, index=True)
+    actor: Mapped[str] = mapped_column(String(100), index=True)  # user:alice | service:api-key | cli | anonymous
+    role: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    action: Mapped[str] = mapped_column(String(64), index=True)  # auth.login, authz.denied, user.create, ...
+    target_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    target_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    outcome: Mapped[str] = mapped_column(String(16), index=True)  # ok | denied | error
+    ip: Mapped[str | None] = mapped_column(String(45), nullable=True)
+    detail: Mapped[dict] = mapped_column(JsonType, default=dict)  # small, redacted; never passwords or tokens
