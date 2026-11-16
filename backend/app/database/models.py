@@ -1,7 +1,20 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, Uuid
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -209,3 +222,52 @@ class Ioc(Base):
     checked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
     created_by: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+
+ACTION_TYPES = ("add_blocklist_entry", "request_ip_block", "request_host_isolation", "generate_report")
+ACTION_STATUSES = ("proposed", "rejected", "simulated", "executed", "failed", "rolled_back")
+
+
+class ResponseAction(Base):
+    """A response proposed for an incident. Nothing takes effect until a different person approves it, and by default
+    approval only simulates (status `simulated`). The state machine lives in app/response/workflow.py."""
+
+    __tablename__ = "response_actions"
+    __table_args__ = (
+        CheckConstraint("type IN ('add_blocklist_entry','request_ip_block','request_host_isolation','generate_report')", name="ck_action_type"),
+        CheckConstraint("status IN ('proposed','rejected','simulated','executed','failed','rolled_back')", name="ck_action_status"),
+        UniqueConstraint("requested_by", "idempotency_key", name="uq_action_idempotency"),
+    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    # RESTRICT: an incident with actions must not disappear (merging incidents re-points them first)
+    incident_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("incidents.id", ondelete="RESTRICT"), index=True)
+    type: Mapped[str] = mapped_column(String(32))
+    params: Mapped[dict] = mapped_column(JsonType)  # validated against the typed schema for `type`
+    status: Mapped[str] = mapped_column(String(16), index=True)
+    source: Mapped[str] = mapped_column(String(16))  # human | policy | agent
+    requested_by: Mapped[str] = mapped_column(String(100))  # a person, or policy / agent:<provider> for suggestions
+    triggered_by: Mapped[str] = mapped_column(String(100))  # the person who proposed or asked for the suggestion: also barred from approving it
+    requested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, index=True)
+    decided_by: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    decision_reason: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    executed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    result: Mapped[dict | None] = mapped_column(JsonType, nullable=True)
+    rollback_guidance: Mapped[str] = mapped_column(Text)
+    idempotency_key: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    request_hash: Mapped[str] = mapped_column(String(64))  # same key with a different request is a conflict, not a replay
+
+
+class BlocklistEntry(Base):
+    """SentinelX only records the decision. Enforcing it (firewall, proxy) is done by whatever consumes this list."""
+
+    __tablename__ = "blocklist_entries"
+    __table_args__ = (Index("uq_blocklist_active", "ip", unique=True, postgresql_where=text("active"), sqlite_where=text("active")),)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    ip: Mapped[str] = mapped_column(String(45))
+    action_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("response_actions.id", ondelete="RESTRICT"))
+    active: Mapped[bool] = mapped_column(Boolean, default=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    created_by: Mapped[str] = mapped_column(String(100))
+    removed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    removed_by: Mapped[str | None] = mapped_column(String(100), nullable=True)

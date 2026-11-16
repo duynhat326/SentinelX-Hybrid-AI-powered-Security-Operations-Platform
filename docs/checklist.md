@@ -100,7 +100,7 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [x] **Mỗi route khai báo quyền cần có**; test chạy *mọi route* với *mọi loại người gọi* (ẩn danh, token sai, service, 4 vai trò) và fail nếu có route thiếu khai báo. *Xác nhận:* `tests/test_authz_matrix.py`; đã thử phá 5 chỗ (bỏ check quyền, không commit audit, thêm route không khai báo, bearer sai rơi về API key, cấp thừa quyền) và test fail mỗi lần
 - [x] `audit_logs`: đăng nhập thành công/thất bại, đăng xuất, tạo/sửa user, **mọi lần bị từ chối quyền của người đã xác thực** (khớp 100% trong test ma trận), mỗi lần chạy AI investigate; không có route nào sửa/xóa audit
 - [x] Mật khẩu/token không bao giờ vào audit hay response — *Xác nhận:* `test_passwords_and_tokens_never_reach_audit_logs_or_responses`
-- [ ] Audit log của **hành động phản ứng** — thuộc lát 6C
+- [x] Audit log của **hành động phản ứng** — xong ở lát 6C
 - [ ] *Chưa làm (ghi trong `docs/security-model.md`):* audit bất biến ở mức database, khóa tài khoản, đổi mật khẩu qua API, MFA
 
 ### 6B - Threat intel — XONG, chờ bạn review (nhánh `feat/m6b-threat-intel`)
@@ -115,10 +115,20 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [ ] **Chưa gọi API thật của VirusTotal/AbuseIPDB**: adapter theo tài liệu công khai, chỉ test bằng transport giả. Cần thử với khóa tạm trước khi tin vào định dạng phản hồi
 - [ ] *Chưa làm:* dữ liệu MITRE ATT&CK cục bộ, nhập feed IOC, làm mới định kỳ; `risk_score` đã lưu có thể cũ cho tới lần tính lại kế tiếp khi một verdict hết hạn
 
-### 6C - Phản ứng có duyệt — chưa làm
-- [ ] Response Agent chỉ **đề xuất** (kiểu dữ liệu chặt, allowlist hành động), mặc định dry-run
-- [ ] Luồng duyệt: người duyệt + kiểm tra quyền + idempotency + audit + hướng dẫn rollback
-- [ ] Test: chặn hành động trái phép đạt 100%, audit đủ 100% hành động phản ứng
+### 6C - Phản ứng có duyệt — XONG, chờ bạn review (nhánh `feat/m6c-response-actions`)
+- [x] Hành động **có kiểu, allowlist là một union** (blocklist cục bộ, yêu cầu chặn IP, yêu cầu cô lập host, báo cáo); không loại nào mang lệnh/URL, trường lạ bị từ chối. *Xác nhận:* `test_only_typed_allowlisted_actions_are_accepted` (14 dạng body xấu)
+- [x] Chỉ hai loại có thể chạy thật (blocklist cục bộ, báo cáo) và vẫn nằm trong SentinelX; chặn firewall và cô lập host **chỉ mô phỏng**. Công tắc `SENTINELX_RESPONSE_REAL_ACTIONS_ENABLED` mặc định tắt: duyệt = **dry-run** (`result.would`)
+- [x] Policy kiểm tra lúc đề xuất **và lại lúc duyệt**: địa chỉ phải public, phải nằm trong bằng chứng của incident, không thuộc danh sách bảo vệ (`SENTINELX_PROTECTED_IPS`, gõ sai thì không khởi động), chưa bị chặn; host phải thuộc incident và là asset đã biết
+- [x] Duyệt cần quyền `approve` + **người khác** người đề xuất **và người đã yêu cầu gợi ý** (cột `triggered_by`: không ai tự duyệt thứ mình đã bảo agent đưa ra); duyệt/từ chối/rollback đều lặp lại an toàn; khóa hàng khi quyết định; `Idempotency-Key` (cùng khóa khác nội dung = 409; replay sau khi policy đổi vẫn trả bản gốc)
+- [x] Rollback blocklist (hủy kích hoạt, cho phép đề xuất lại); loại khác trả `rollback_guidance`
+- [x] **Audit đủ 100%:** mỗi chuyển trạng thái và mỗi lần từ chối đúng số dòng audit. *Xác nhận:* `test_each_state_change_and_refusal_leaves_exactly_the_audit_rows_it_should` (19 bước, mỗi bước kiểm số dòng chính xác)
+- [x] **Chặn trái phép 100% trong bộ test đã định nghĩa:** ma trận phân quyền phủ 8 route mới; test từ chối cho từng loại vi phạm (tự duyệt, người yêu cầu gợi ý duyệt, analyst duyệt, real khi tắt công tắc, real cho loại chỉ mô phỏng, policy đổi sau khi đề xuất)
+- [x] Response Agent: chế độ policy (xác định, không cần LLM) và chế độ AI: đầu ra model là **không tin cậy**, phải khớp allowlist (còn lại bị bỏ và đếm), qua cùng policy (địa chỉ/host ngoài incident bị từ chối, kể cả khi log bảo model làm vậy); chỉ tạo **đề xuất**, không bao giờ chạy. *Xác nhận:* `test_model_proposals_are_untrusted_*`, `test_log_text_that_tries_to_steer_the_agent_*`
+- [x] An toàn khi chạy song song (Postgres): 6 người duyệt cùng lúc → thực thi đúng 1 lần; 6 đề xuất cùng khóa → 1 dòng. Đã **phá khóa hàng và xử lý trùng khóa: test fail 3/3**, giữ nguyên thì pass 3/3 (bản đầu của test chưa chứng minh gì nên đã viết lại với cửa sổ race được mở rộng)
+- [x] Gộp incident chuyển hành động và run AI sang incident còn lại (FK `RESTRICT` chặn xóa incident đang có hành động). Migration `0009`
+- [x] Đã phá 16 chỗ (bỏ bốn-mắt, chỉ chặn người đề xuất, bỏ công tắc, firewall chạy thật, không kiểm policy lúc duyệt, bỏ policy lúc đề xuất, cho trường lạ, bỏ audit khi duyệt, không commit lúc từ chối, bỏ rollback, quên chuyển hành động khi gộp, duyệt hai lần, báo cáo không escape, bỏ idempotency, bỏ khóa hàng, bỏ xử lý trùng khóa) và test fail mỗi lần
+- [ ] **Chưa chạy với firewall, EDR hay hệ thống ticket thật**: blocklist chỉ là dữ liệu, SentinelX không chặn lưu lượng. Bốn-mắt so sánh tên tài khoản (hai tài khoản của một người vượt được)
+- [ ] *Chưa làm:* kết nối firewall/EDR (nếu làm phải là loại hành động mới trong allowlist, mô phỏng trước), UI duyệt (M7), hết hạn cho đề xuất treo
 
 ## M7 - Dashboard React + TypeScript
 - [ ] Khung dự án `frontend/` + client API

@@ -1,4 +1,5 @@
 from functools import lru_cache
+from ipaddress import IPv4Network, IPv6Network, ip_network
 from typing import Literal
 
 from pydantic import Field, SecretStr, field_validator, model_validator
@@ -37,12 +38,27 @@ class Settings(BaseSettings):
     ti_cache_ttl_hours: int = Field(default=24, ge=1, le=720)
     ti_timeout_seconds: float = Field(default=5, gt=0, le=30)
     ti_external_rate_per_minute: int = Field(default=4, ge=1)  # per provider; the free VirusTotal tier allows 4
+    # Response. Real effects are off by default: approval then only simulates. The protected list is addresses and networks
+    # (comma separated, e.g. your gateway, DNS and monitoring) that no response may ever target.
+    response_real_actions_enabled: bool = False
+    protected_ips: str = ""
     cors_origins: list[str] = []
 
     @field_validator("vt_api_key", "abuseipdb_api_key", mode="before")
     @classmethod
     def _blank_key_is_unset(cls, v):
         return None if v in (None, "") else v  # Compose passes an empty string for an unset variable
+
+    @field_validator("protected_ips")
+    @classmethod
+    def _protected_ips_parse(cls, v: str) -> str:
+        for part in (p.strip() for p in v.split(",") if p.strip()):
+            ip_network(part, strict=False)  # a typo fails startup instead of silently protecting nothing
+        return v
+
+    @property
+    def protected_networks(self) -> list[IPv4Network | IPv6Network]:
+        return [ip_network(p.strip(), strict=False) for p in self.protected_ips.split(",") if p.strip()]
 
     @model_validator(mode="after")
     def _weights_sum_to_one(self) -> "Settings":

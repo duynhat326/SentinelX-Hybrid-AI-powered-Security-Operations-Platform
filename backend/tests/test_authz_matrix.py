@@ -27,6 +27,14 @@ MATRIX = {
     ("GET", "/api/v1/audit-logs"): "read_audit",
     ("POST", "/api/v1/enrich"): "enrich",
     ("POST", "/api/v1/incidents/{incident_id}/enrich"): "enrich",
+    ("POST", "/api/v1/incidents/{incident_id}/response-actions"): "propose",
+    ("POST", "/api/v1/incidents/{incident_id}/response-actions/suggest"): "propose",
+    ("GET", "/api/v1/response-actions"): "read",
+    ("GET", "/api/v1/response-actions/{action_id}"): "read",
+    ("POST", "/api/v1/response-actions/{action_id}/approve"): "approve",
+    ("POST", "/api/v1/response-actions/{action_id}/reject"): "approve",
+    ("POST", "/api/v1/response-actions/{action_id}/rollback"): "approve",
+    ("GET", "/api/v1/blocklist"): "read",
     ("GET", "/api/v1/iocs"): "read",
     ("POST", "/api/v1/iocs"): "manage_iocs",
     ("DELETE", "/api/v1/iocs/{ioc_id}"): "manage_iocs",
@@ -48,7 +56,7 @@ def test_every_route_is_either_public_or_in_the_matrix():
 
 
 def _call(client, method, path, headers):
-    url = path.replace("{incident_id}", ZERO).replace("{user_id}", ZERO).replace("{ioc_id}", ZERO)
+    url = path.replace("{incident_id}", ZERO).replace("{user_id}", ZERO).replace("{ioc_id}", ZERO).replace("{action_id}", ZERO)
     kwargs = {"json": {}} if method in ("POST", "PATCH") else {}
     return client.request(method, url, headers=headers, **kwargs)
 
