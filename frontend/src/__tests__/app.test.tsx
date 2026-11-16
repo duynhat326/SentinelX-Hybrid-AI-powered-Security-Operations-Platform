@@ -26,7 +26,7 @@ describe("signing in", () => {
     expect(await screen.findByRole("heading", { name: "Overview" })).toBeInTheDocument();
     expect(calls[0]).toMatchObject({ method: "POST", path: "/api/v1/auth/login", body: { username: "alice", password: "a perfectly fine pass" } });
     expect(sessionStorage.getItem("sentinelx.token")).toBe("tok-new");
-    expect(screen.getByText("42")).toBeInTheDocument();
+    expect(screen.getByText("events ingested").closest("li")).toHaveTextContent("42");
   });
 
   it("shows a failed sign-in as an alert and keeps no token", async () => {
@@ -50,12 +50,13 @@ describe("signing in", () => {
 });
 
 describe("pages", () => {
-  it("writes the chart numbers out, not just colours", async () => {
+  it("writes the chart numbers out, not just colours, and links each tile and slice to the records behind it", async () => {
     session("viewer");
     render(<App />);
-    const region = await screen.findByRole("region", { name: "Alerts by severity" });
-    expect(within(region).getByText("critical").parentElement).toHaveTextContent("1");
-    expect(within(region).getByText("high").parentElement).toHaveTextContent("3");
+    const region = await screen.findByRole("region", { name: "Open incidents by severity" });
+    expect((await within(region).findByText("high")).parentElement).toHaveTextContent("2");
+    expect(within(region).getByRole("link", { name: "high" })).toHaveAttribute("href", "#/incidents?severity=high");
+    expect((await screen.findByText("alerts raised")).closest("li")).toHaveTextContent("1 critical · 3 high");
     expect(screen.getByText("actions awaiting approval").closest("a")).toHaveAttribute("href", "#/approvals");
   });
 

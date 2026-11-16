@@ -1,13 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
 import { describeError } from "./api";
 
+/** Re-renders every `ms` so "updated 12 s ago" stays true. */
+export function useNow(ms = 5000) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), ms); return () => clearInterval(t); }, [ms]);
+  return now;
+}
+
 export function useApi<T>(load: () => Promise<T>, deps: unknown[] = []) {
-  const [state, setState] = useState<{ data?: T; error?: string; loading: boolean }>({ loading: true });
+  const [state, setState] = useState<{ data?: T; error?: string; loading: boolean; at?: number }>({ loading: true });
   const [tick, setTick] = useState(0);
   useEffect(() => {
     let live = true;
     setState((s) => ({ ...s, loading: true }));
-    load().then((data) => live && setState({ data, loading: false }), (e) => live && setState({ error: describeError(e), loading: false }));
+    load().then((data) => live && setState({ data, loading: false, at: Date.now() }), (e) => live && setState({ error: describeError(e), loading: false }));
     return () => { live = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...deps, tick]);

@@ -15,7 +15,8 @@ export default function Login() {
   }
   return (
     <main className="login">
-      <h1>SentinelX</h1>
+      <img className="login-logo" src="/brand/logo.png" alt="SentinelX" width="220" height="220" />
+      <h1 className="sr-only">SentinelX</h1>
       <p className="muted">Detect. Investigate. Understand. Respond.</p>
       {notice && <p role="status" className="notice">{notice}</p>}
       <form onSubmit={submit}>
