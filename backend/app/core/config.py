@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -29,7 +29,20 @@ class Settings(BaseSettings):
     llm_rate_limit_per_minute: int = Field(default=10, ge=1)  # per client IP; each run is two model calls
     token_ttl_minutes: int = Field(default=480, ge=5, le=10080)  # bearer session lifetime
     login_rate_limit_per_minute: int = Field(default=10, ge=1)  # per client IP
+    # Threat intelligence. External lookups send an indicator to a third party, so they are off by default and
+    # each call also needs the caller's explicit confirmation. Keys are SecretStr: never logged, audited or returned.
+    ti_external_enabled: bool = False
+    vt_api_key: SecretStr | None = None
+    abuseipdb_api_key: SecretStr | None = None
+    ti_cache_ttl_hours: int = Field(default=24, ge=1, le=720)
+    ti_timeout_seconds: float = Field(default=5, gt=0, le=30)
+    ti_external_rate_per_minute: int = Field(default=4, ge=1)  # per provider; the free VirusTotal tier allows 4
     cors_origins: list[str] = []
+
+    @field_validator("vt_api_key", "abuseipdb_api_key", mode="before")
+    @classmethod
+    def _blank_key_is_unset(cls, v):
+        return None if v in (None, "") else v  # Compose passes an empty string for an unset variable
 
     @model_validator(mode="after")
     def _weights_sum_to_one(self) -> "Settings":

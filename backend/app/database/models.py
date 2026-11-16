@@ -1,7 +1,7 @@
 import uuid
 from datetime import UTC, datetime
 
-from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, Text, Uuid
+from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, Uuid
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -188,3 +188,24 @@ class AuditLog(Base):
     outcome: Mapped[str] = mapped_column(String(16), index=True)  # ok | denied | error
     ip: Mapped[str | None] = mapped_column(String(45), nullable=True)
     detail: Mapped[dict] = mapped_column(JsonType, default=dict)  # small, redacted; never passwords or tokens
+
+
+class Ioc(Base):
+    """One verdict about one indicator from one source. `manual` rows are the local IOC database (no expiry);
+    provider rows are a cache and expire. Unknown is never stored: no row means no information."""
+
+    __tablename__ = "iocs"
+    __table_args__ = (
+        UniqueConstraint("kind", "value", "source", name="uq_ioc"),
+        CheckConstraint("score BETWEEN 0 AND 100", name="ck_ioc_score"),
+        CheckConstraint("kind IN ('ip','domain','sha256')", name="ck_ioc_kind"),
+    )
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    kind: Mapped[str] = mapped_column(String(8))
+    value: Mapped[str] = mapped_column(String(255))
+    source: Mapped[str] = mapped_column(String(16))  # manual | virustotal | abuseipdb
+    score: Mapped[int] = mapped_column(Integer)  # 0 clean .. 100 malicious
+    summary: Mapped[str] = mapped_column(String(500))  # built from numbers by us, or written by an analyst; never provider text
+    checked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    created_by: Mapped[str | None] = mapped_column(String(100), nullable=True)

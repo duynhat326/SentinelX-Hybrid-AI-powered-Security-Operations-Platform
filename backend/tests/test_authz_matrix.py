@@ -25,6 +25,11 @@ MATRIX = {
     ("GET", "/api/v1/users"): "manage_users",
     ("PATCH", "/api/v1/users/{user_id}"): "manage_users",
     ("GET", "/api/v1/audit-logs"): "read_audit",
+    ("POST", "/api/v1/enrich"): "enrich",
+    ("POST", "/api/v1/incidents/{incident_id}/enrich"): "enrich",
+    ("GET", "/api/v1/iocs"): "read",
+    ("POST", "/api/v1/iocs"): "manage_iocs",
+    ("DELETE", "/api/v1/iocs/{ioc_id}"): "manage_iocs",
     ("POST", "/api/v1/auth/logout"): ANY_USER,  # last: it revokes the caller's own session
 }
 NO_KEY = {"X-API-Key": ""}
@@ -43,7 +48,7 @@ def test_every_route_is_either_public_or_in_the_matrix():
 
 
 def _call(client, method, path, headers):
-    url = path.replace("{incident_id}", ZERO).replace("{user_id}", ZERO)
+    url = path.replace("{incident_id}", ZERO).replace("{user_id}", ZERO).replace("{ioc_id}", ZERO)
     kwargs = {"json": {}} if method in ("POST", "PATCH") else {}
     return client.request(method, url, headers=headers, **kwargs)
 

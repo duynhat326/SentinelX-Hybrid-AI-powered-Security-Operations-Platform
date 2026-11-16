@@ -3,12 +3,12 @@ import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import timedelta
-from ipaddress import ip_address, ip_network
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
+from app.core.netutil import is_external
 from app.core.timeutil import utc as _utc
 from app.database.models import Alert, AlertEvent, DetectionRule, SecurityEvent
 
@@ -104,21 +104,13 @@ def _run_key_persistence(db: Session, ev: SecurityEvent, cfg: Settings) -> Match
     return None
 
 
-# RFC 5737 / RFC 3849 documentation ranges count as "external" so lab fixtures never need real addresses.
-_DOC_NETS = [ip_network(n) for n in ("192.0.2.0/24", "198.51.100.0/24", "203.0.113.0/24", "2001:db8::/32")]
 _NET_LOLBINS = {"powershell.exe", "pwsh.exe", "mshta.exe", "rundll32.exe", "regsvr32.exe", "certutil.exe",
                 "bitsadmin.exe", "wscript.exe", "cscript.exe"}
 
 
-def _external(ip: str) -> bool:
-    a = ip_address(ip)
-    # multicast counts as is_global in the stdlib, but it is not an outbound destination worth alerting on
-    return (a.is_global and not a.is_multicast) or any(a in n for n in _DOC_NETS)
-
-
 def _lolbin_outbound(db: Session, ev: SecurityEvent, cfg: Settings) -> Match | None:
     if (ev.source == "sysmon" and ev.category == "network" and ev.dst_ip and _base(ev.process_name) in _NET_LOLBINS
-            and _external(ev.dst_ip)):
+            and is_external(ev.dst_ip)):
         return _single(ev)
     return None
 

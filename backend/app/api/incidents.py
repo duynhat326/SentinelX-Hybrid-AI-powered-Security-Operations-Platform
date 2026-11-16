@@ -1,15 +1,15 @@
 import uuid
 from collections import defaultdict
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.api.auth import require
-from app.database.models import Alert, AlertEvent, Incident, IncidentAlert, IncidentEntity, SecurityEvent
+from app.database.models import Alert, AlertEvent, Incident, IncidentAlert, IncidentEntity, Ioc, SecurityEvent
 from app.database.session import get_db
 
 router = APIRouter(prefix="/api/v1/incidents", dependencies=[Depends(require("read"))])
@@ -56,12 +56,24 @@ class TimelineEntry(BaseModel):
     alert_ids: list[uuid.UUID]  # detections that cite this event as evidence
 
 
+class IocOut(BaseModel):
+    id: uuid.UUID
+    kind: str
+    value: str
+    source: str
+    score: int
+    summary: str
+    checked_at: datetime
+    expires_at: datetime | None
+
+
 class IncidentDetail(IncidentSummary):
     risk_breakdown: dict[str, Any]
     entities: dict[str, list[str]]
     alerts: list[IncidentAlertOut]
     timeline: list[TimelineEntry]
     timeline_total: int
+    intel: list[IocOut]  # stored threat-intelligence verdicts for the incident's addresses
 
 
 def _summaries(db: Session, incidents: list[Incident]) -> list[IncidentSummary]:
@@ -119,8 +131,11 @@ def get_incident(incident_id: uuid.UUID, db: Session = Depends(get_db),
     for kind, value in db.execute(select(IncidentEntity.kind, IncidentEntity.value).where(IncidentEntity.incident_id == inc.id)
                                   .order_by(IncidentEntity.kind, IncidentEntity.value)).tuples():
         entities[kind].append(value)
+    ips = entities.get("ip", [])
+    intel = list(db.scalars(select(Ioc).where(Ioc.kind == "ip", Ioc.value.in_(ips), or_(Ioc.expires_at.is_(None), Ioc.expires_at > datetime.now(UTC)))
+                            .order_by(Ioc.score.desc(), Ioc.value))) if ips else []
     return IncidentDetail(
-        **summary.model_dump(), risk_breakdown=inc.risk_breakdown, entities=dict(entities), timeline=timeline, timeline_total=total,
+        **summary.model_dump(), risk_breakdown=inc.risk_breakdown, intel=[IocOut.model_validate(i, from_attributes=True) for i in intel], entities=dict(entities), timeline=timeline, timeline_total=total,
         alerts=[IncidentAlertOut(id=a.id, rule_id=a.rule_id, title=a.title, severity=a.severity, mitre=a.mitre, reason=reason,
                                  first_event_at=a.first_event_at, last_event_at=a.last_event_at, event_count=a.event_count)
                 for a, reason in alert_rows],
