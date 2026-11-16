@@ -1,19 +1,19 @@
 import { useState } from "react";
 import { api } from "../api";
 import { useApi } from "../hooks";
-import { href } from "../router";
+import { href, queryOf } from "../router";
 import { Empty, Err, fmt, Loading, Page, Sev } from "../ui";
 
 export default function Alerts() {
   const { data, error, loading } = useApi(() => api.alerts(200));
-  const [sev, setSev] = useState("");
-  const [q, setQ] = useState("");
-  const rows = (data ?? []).filter((a) => (!sev || a.severity === sev) && (!q || `${a.host} ${a.title} ${a.rule_id}`.toLowerCase().includes(q.toLowerCase())));
+  const [sev, setSev] = useState(() => queryOf().get("severity") ?? "");
+  const [q, setQ] = useState(() => queryOf().get("q") ?? "");
+  const rows = (data ?? []).filter((a) => (!sev || a.severity === sev) && (!q || `${a.host} ${a.title} ${a.rule_id} ${a.mitre.join(" ")}`.toLowerCase().includes(q.toLowerCase())));
   return (
     <Page title="Alerts">
       <div className="filters">
         <label>Severity<select value={sev} onChange={(e) => setSev(e.target.value)}><option value="">all</option>{["critical", "high", "medium", "low"].map((s) => <option key={s}>{s}</option>)}</select></label>
-        <label>Search<input value={q} onChange={(e) => setQ(e.target.value)} placeholder="host, rule or title" /></label>
+        <label>Search<input value={q} onChange={(e) => setQ(e.target.value)} placeholder="host, rule, title or technique" /></label>
       </div>
       <Err msg={error} />
       {loading && !data ? <Loading /> : rows.length === 0 ? <Empty>No alerts match.</Empty> : (

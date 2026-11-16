@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/banner.jpg" alt="SentinelX: Detect. Investigate. Understand. Respond. An analyst-assistance mini-SOC: rules decide, people approve, the AI only explains." width="860"></p>
+
 # SentinelX
 
 > **Detect. Investigate. Understand. Respond.**

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { AuthProvider, useAuth } from "./auth";
 import AgentRuns from "./pages/AgentRuns";
 import Alerts from "./pages/Alerts";
@@ -33,6 +33,16 @@ function Page({ route }: { route: Route }): ReactNode {
   }
 }
 
+/** auto follows the system; the choice is remembered in this browser only. */
+function ThemeToggle() {
+  const [t, setT] = useState(() => { try { return localStorage.getItem("sentinelx.theme") ?? ""; } catch { return ""; } });
+  useEffect(() => {
+    if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+    try { if (t) localStorage.setItem("sentinelx.theme", t); else localStorage.removeItem("sentinelx.theme"); } catch { /* private mode: the choice just is not remembered */ }
+  }, [t]);
+  return <button type="button" className="secondary theme" onClick={() => setT(t === "dark" ? "light" : t === "light" ? "" : "dark")}>Theme: {t || "auto"}</button>;
+}
+
 function Shell() {
   const { me, ready, can, logout } = useAuth();
   const route = useRoute();
@@ -43,9 +53,9 @@ function Shell() {
     <>
       <a className="skip" href="#main">Skip to content</a>
       <header className="top">
-        <strong className="brand">SentinelX</strong>
+        <strong className="brand"><img src="/brand/mark.png" alt="" width="36" height="36" />SentinelX</strong>
         <nav aria-label="Main"><ul>{NAV.filter((n) => !n.perm || can(n.perm)).map((n) => <li key={n.name}><a href={href(n.path)} aria-current={active === n.name ? "page" : undefined}>{n.label}</a></li>)}</ul></nav>
-        <span className="who">{me.name} ({me.role}) <button className="link" onClick={logout}>Sign out</button></span>
+        <span className="who"><ThemeToggle />{me.name} ({me.role}) <button className="link" onClick={logout}>Sign out</button></span>
       </header>
       <main id="main"><Page route={route} /></main>
     </>

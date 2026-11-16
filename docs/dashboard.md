@@ -2,16 +2,16 @@
 
 A React and TypeScript single-page app in `frontend/` (Vite, no UI library, no chart library). In Docker it is served by nginx on <http://localhost:8080>, which also proxies `/api` to the backend, so the browser only ever talks to one origin.
 
-| Overview | Incident detail | MITRE |
-|---|---|---|
-| ![Overview](screenshots/overview.jpg) | ![Incident](screenshots/incident.jpg) | ![MITRE](screenshots/mitre.jpg) |
+| Overview | Overview widgets | Incident detail | MITRE |
+|---|---|---|---|
+| ![Overview](screenshots/overview.jpg) | ![Widgets](screenshots/overview-widgets.jpg) | ![Incident](screenshots/incident.jpg) | ![MITRE](screenshots/mitre.jpg) |
 
 Screenshots show lab data seeded from the test corpus.
 
 ## Pages
 | Page | What it shows | Needs |
 |---|---|---|
-| Overview | exact counts (events, open incidents, pending approvals, blocklist), severity bars with the numbers written out, top-risk incidents, latest alerts | read |
+| Overview | a SOC-posture console: six exact KPI tiles (events, alerts, open incidents, average risk, approvals waiting, blocklist) with counting numbers and a sparkline; alerts over time stacked by severity; open incidents by severity (donut); an events → alerts → incidents → AI runs → actions funnel; risk distribution; top ATT&CK techniques, busiest hosts and noisiest rules; AI and response status; highest-risk incidents with a score ring; latest alerts. A 6h / 24h / 7d / All switch scopes the charts and the page refreshes itself every 30 s. Every tile, slice and bar links to the records behind it (`#/alerts?q=...`, `#/incidents?severity=...`) | read |
 | Alerts | filterable table (severity, host, rule), link to the incident | read |
 | Incidents, incident detail | ranked by risk; detail has the risk-score breakdown, entities, threat-intel verdicts, alerts with why they were grouped, the evidence timeline with how many alerts cite each event, AI runs, response actions | read |
 | MITRE | techniques of current alerts grouped by tactic | read |
@@ -52,6 +52,10 @@ Checks, also run in CI: `npm run typecheck`, `npm test`, `npm run build`.
 - Timestamps use the browser's locale and time zone.
 
 ## Look and fonts
-Tokens (warm canvas, coral accent, dark product surfaces, radii) come from the project's `DESIGN.md`; type and motion follow Apple's style: large tight headings, translucent blurred sticky bar, pill tabs and buttons, springy easing, light and dark by `prefers-color-scheme`, everything still at rest under `prefers-reduced-motion`. Effects are CSS only (glow in the overview hero and sign-in page, rising cards, bars that grow), so the strict CSP is unchanged; severity and scores are still written as text.
+The overview follows the cases-dashboard idea of modern SOC tools (KPIs, trends, severity mix, workload, then a click through to the cases behind a number); the look is a dark graphite console with the logo's electric blue as the accent, severity colours that are always paired with text, and a light theme (a Theme button switches auto, dark and light and is remembered in this browser). Type and motion follow Apple's style: large tight headings, translucent blurred sticky bar, pill tabs and buttons, springy easing, light and dark by `prefers-color-scheme`, everything still at rest under `prefers-reduced-motion`. Effects are CSS only (glow in the overview hero and sign-in page, rising cards, bars that grow), so the strict CSP is unchanged; severity and scores are still written as text.
 **Font:** SF Compact (Text 400/500/600, Display 700), subset to Latin (about 60 KB each) and served from `/fonts`. Apple's licence does not allow redistributing it, so `frontend/public/fonts/` is git-ignored: copy the files in locally (a clone without them falls back to the system UI font, and the dashboard works the same). Do not publish a build that contains them.
 Dev against another backend port: `API_URL=http://127.0.0.1:8001 npm run dev`.
+
+**Charts are a view of the latest records.** They use the newest 200 alerts and 200 open incidents (the API caps lists), and the time window is measured back from the newest alert so a lab with old data still draws something; the tiles are exact server counts. Not built: per-role dashboard templates, saved or custom widgets, a mean-time-to-resolve chart (incidents cannot be closed from the product yet).
+
+**Brand files.** The logo, cover and icon supplied in `frontend/assets/` (about 1.5 MB each) are served as small copies in `frontend/public/brand/` (logo 560 px, a 128 px cropped mark for the top bar, the cover as a 1600 px JPEG used behind the sign-in page, the Apple touch icon) plus `public/favicon.ico`; `index.html` links the icons and share tags. The Dockerfile now copies `public/` (it did not before, so the fonts and these files would not have reached the image). `docs/banner.jpg` is the cover used at the top of the README.

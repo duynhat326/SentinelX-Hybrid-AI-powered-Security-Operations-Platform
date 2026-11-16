@@ -7,7 +7,7 @@ export type Route =
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function parseRoute(hash: string): Route {
-  const [, a, b] = hash.replace(/^#/, "").split("/");
+  const [, a, b] = hash.replace(/^#/, "").split("?")[0].split("/");
   switch (a ?? "") {
     case "": return { name: "overview" };
     case "alerts": case "incidents": case "mitre": case "intel": case "approvals": case "audit":
@@ -28,3 +28,6 @@ export function useRoute(): Route {
 }
 
 export const href = (path: string) => `#/${path}`;
+
+/** Filters carried in the link (#/alerts?severity=high), so a chart can open the records behind it. */
+export const queryOf = (hash = window.location.hash) => new URLSearchParams(hash.split("?")[1] ?? "");
