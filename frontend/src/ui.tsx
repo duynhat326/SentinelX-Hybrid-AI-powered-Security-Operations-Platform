@@ -19,9 +19,20 @@ export const Err = ({ msg }: { msg: string | null | undefined }) => (msg ? <p ro
 export const Loading = () => <p className="muted" role="status">Loading…</p>;
 export const Empty = ({ children }: { children: ReactNode }) => <p className="muted">{children}</p>;
 
-export function Page({ title, children, aside }: { title: string; children: ReactNode; aside?: ReactNode }) {
+const STEPS = ["Detect", "Investigate", "Understand", "Respond"];
+/** Product line and the four stages; every stage is a deterministic step except the advisory AI explanation. */
+export const Hero = () => (
+  <div className="hero">
+    <h1>SentinelX</h1>
+    <p>Detect. Investigate. Understand. Respond. An analyst-assistance mini-SOC: rules decide, people approve, the AI only explains.</p>
+    <ol className="steps" aria-label="Pipeline">{STEPS.map((s, i) => <li key={s}><b>{i + 1}</b>{s}</li>)}</ol>
+  </div>
+);
+
+export function Page({ title, children, aside, hero }: { title: string; children: ReactNode; aside?: ReactNode; hero?: ReactNode }) {
   return (
     <section>
+      {hero}
       <div className="page-head"><h1>{title}</h1>{aside}</div>
       {children}
     </section>

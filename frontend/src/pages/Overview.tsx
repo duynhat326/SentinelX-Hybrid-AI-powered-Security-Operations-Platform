@@ -1,14 +1,14 @@
 import { api } from "../api";
 import { useApi } from "../hooks";
 import { href } from "../router";
-import { Card, Empty, Err, fmt, Loading, Page, Risk, Sev, SevBars } from "../ui";
+import { Card, Hero, Empty, Err, fmt, Loading, Page, Risk, Sev, SevBars } from "../ui";
 
 export default function Overview() {
   const ov = useApi(() => api.overview());
   const inc = useApi(() => api.incidents({ limit: 5, status: "open" }));
   const al = useApi(() => api.alerts(8));
   return (
-    <Page title="Overview">
+    <Page title="Overview" hero={<Hero />}>
       <Err msg={ov.error} />
       {ov.loading && !ov.data ? <Loading /> : ov.data && (
         <>
