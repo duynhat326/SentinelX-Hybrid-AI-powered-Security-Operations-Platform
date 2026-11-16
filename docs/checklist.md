@@ -130,11 +130,19 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [ ] **Chưa chạy với firewall, EDR hay hệ thống ticket thật**: blocklist chỉ là dữ liệu, SentinelX không chặn lưu lượng. Bốn-mắt so sánh tên tài khoản (hai tài khoản của một người vượt được)
 - [ ] *Chưa làm:* kết nối firewall/EDR (nếu làm phải là loại hành động mới trong allowlist, mô phỏng trước), UI duyệt (M7), hết hạn cho đề xuất treo
 
-## M7 - Dashboard React + TypeScript
-- [ ] Khung dự án `frontend/` + client API
-- [ ] Trang tổng quan, danh sách alert, incident + timeline
-- [ ] Bản đồ MITRE, threat intel, hàng chờ duyệt, agent runs, audit logs
-- [ ] Test frontend; chạy được qua Docker Compose
+## M7 - Dashboard React + TypeScript — XONG, chờ bạn review (nhánh `feat/m7-dashboard`)
+- [x] Khung `frontend/` (Vite, React 19, TypeScript strict, không thư viện UI/biểu đồ) + client API có kiểu; đăng nhập bằng bearer token, phiên hết hạn đưa về trang đăng nhập. *Xác nhận:* `src/__tests__/api.test.ts`, `app.test.tsx`
+- [x] Trang tổng quan (số liệu **chính xác** từ endpoint `/api/v1/overview` mới, biểu đồ có ghi số, không chỉ màu), danh sách alert, incident + trang chi tiết (phân tích điểm risk, thực thể, TI, lý do gom alert, **timeline bằng chứng** kèm số alert trích dẫn)
+- [x] Bản đồ MITRE theo tactic (chỉ đặt tên cho các technique mà rule gán, còn lại hiện là "Unmapped", không đoán). *Xác nhận:* `mitre.test.ts`
+- [x] Threat intel (bảng IOC, tra cứu, thêm/xóa IOC), hàng chờ duyệt, agent runs (`/api/v1/agent-runs` mới), audit log (chỉ admin)
+- [x] Giao diện **ẩn điều khiển theo quyền** (quyền lấy từ `/api/v1/auth/me`, không sao chép bảng quyền) nhưng server vẫn quyết định. *Xác nhận:* test cho viewer, analyst, approver
+- [x] **Xác nhận trước khi gửi ra ngoài** (hộp thoại cảnh báo của server; hủy thì không gửi gì), "Run for real" mặc định không tick, `Idempotency-Key` mỗi form
+- [x] Chống XSS: không dùng `dangerouslySetInnerHTML`; nội dung log thù địch hiện thành chữ (test); báo cáo hiện trong `<pre>`
+- [x] Test frontend: 27 test (Vitest + Testing Library); `tsc --strict` và build sạch. Đã phá 11 chỗ (hiện mọi điều khiển cho mọi vai trò, gửi TI không hỏi, render HTML, tick sẵn "real", key mới mỗi lần, không phát hiện hết phiên, token vào localStorage, từ chối không cần lý do, MITRE tự đặt tên, router nhận id sai, link audit cho mọi người) và test fail mỗi lần
+- [x] Chạy được qua Docker Compose: nginx không root (uid 101), CSP chặt, proxy `/api`, job CI cho frontend. Đã kiểm tra trên trình duyệt thật với dữ liệu mẫu: đăng nhập, tổng quan, chi tiết incident, duyệt dry-run, MITRE, bố cục điện thoại không tràn ngang, console không lỗi dưới CSP, header `X-Forwarded-For` giả bị bỏ qua
+- [x] Ảnh chụp màn hình trong `docs/screenshots/` (dữ liệu lab mẫu), tài liệu `docs/dashboard.md`
+- [ ] **Chưa kiểm tra với trình đọc màn hình** và chưa kiểm tra trên trình duyệt khác ngoài trình duyệt trong app; không phải kiểm toán accessibility
+- [ ] *Chưa làm:* ESLint, phân trang (danh sách giới hạn 200), cập nhật trực tiếp (phải tải lại), token trong HttpOnly cookie (cần backend hỗ trợ), quản lý người dùng trong giao diện (dùng CLI/API)
 
 ## M8 - Kịch bản demo, đánh giá, phát hành
 - [ ] A: SSH brute-force → 1 incident

@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-SentinelX: an analyst-assistance mini-SOC. Everything built so far (Milestone 6) is a Python backend: ingest → normalize → store → detect → alert → correlate into incidents → risk score, all deterministic, plus an *advisory* AI investigation of incidents (LangGraph, Triage → Investigation) that runs only with a mock LLM and is off by default. No real LLM adapter, dashboard or response workflow exists yet (see `docs/checklist.md`). Keep detection, scoring and authorization deterministic; the LLM may only explain evidence, never change severity, scores or permissions (`docs/ai-investigation.md`). Authorization is role-based (`docs/security-model.md`): a new route must declare `Depends(require("<permission>"))` and get a row in `tests/test_authz_matrix.py`, which fails otherwise.
+SentinelX: an analyst-assistance mini-SOC. Everything built so far (Milestone 7) is a Python backend: ingest → normalize → store → detect → alert → correlate into incidents → risk score, all deterministic, plus an *advisory* AI investigation of incidents (LangGraph, Triage → Investigation) that runs only with a mock LLM and is off by default. No real LLM adapter, dashboard or response workflow exists yet (see `docs/checklist.md`). Keep detection, scoring and authorization deterministic; the LLM may only explain evidence, never change severity, scores or permissions (`docs/ai-investigation.md`). Authorization is role-based (`docs/security-model.md`): a new route must declare `Depends(require("<permission>"))` and get a row in `tests/test_authz_matrix.py`, which fails otherwise.
 
-All code lives in `backend/` (Python ≥3.12, FastAPI, SQLAlchemy 2, Alembic, `uv`). `detection-rules/custom/` and `lab/scenarios/` are empty placeholders.
+The backend is in `backend/` (Python ≥3.12, FastAPI, SQLAlchemy 2, Alembic, `uv`); the dashboard is in `frontend/` (React 19, TypeScript, Vite, Vitest, no UI or chart library; see `docs/dashboard.md`). `detection-rules/custom/` and `lab/scenarios/` are empty placeholders.
 
 ## Commands
 
@@ -24,6 +24,10 @@ uv run mypy app
 CI (`.github/workflows/ci.yml`) runs ruff, mypy, then the suite on both SQLite and PostgreSQL 17. Behavior that differs by dialect (advisory locks, `DataError`) must pass on both.
 
 Full stack: `cp .env.example .env` (set `SENTINELX_API_KEY`, `POSTGRES_PASSWORD`) then `docker compose up --build`; the backend container runs `alembic upgrade head` first. Schema changes need a new file in `backend/alembic/versions/` (tests in `test_migrations.py` check them).
+
+## Frontend
+
+Run from `frontend/`: `npm ci`, `npm run dev` (proxies `/api` to :8000), `npm run typecheck`, `npm test`, `npm run build`. Pages are in `src/pages`, the API client and error helpers in `src/api.ts` (add an endpoint there and a mock in `src/__tests__/mockApi.ts`), permission checks come from `/api/v1/auth/me` via `useAuth().can(...)`. Rules to keep: never use `dangerouslySetInnerHTML` (log text is hostile), keep the consent step before any external lookup, keep "run for real" unticked by default, send an `Idempotency-Key` with proposals, and write severities and numbers out as text (never colour alone). nginx serves the build with a strict CSP (no inline script or style) and proxies `/api`; the UI hides controls but the server enforces permissions.
 
 ## Architecture
 

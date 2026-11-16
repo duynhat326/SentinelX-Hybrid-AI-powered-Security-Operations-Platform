@@ -3,7 +3,7 @@
 > Detect. Investigate. Understand. Respond.
 
 Analyst-assistance mini-SOC: deterministic detection and correlation first, constrained AI assistance second.
-**Status: Milestone 6 (RBAC and audit, threat intelligence, approved response actions) on top of Milestone 5 (deterministic core plus advisory AI investigation).** Ingest → normalize → store → detect → alert → API. Detection, correlation into incidents and risk scoring work without any LLM. AI investigation (a LangGraph Triage → Investigation chain, mock LLM only, off by default) explains incidents with cited evidence and never changes scores. No real LLM adapter, dashboard or response workflow yet; see [docs/progress.md](docs/progress.md) and the roadmap checklist [docs/checklist.md](docs/checklist.md).
+**Status: Milestone 7 (dashboard), on top of Milestone 6 (RBAC and audit, threat intelligence, approved response actions) on top of Milestone 5 (deterministic core plus advisory AI investigation).** Ingest → normalize → store → detect → alert → API. Detection, correlation into incidents and risk scoring work without any LLM. AI investigation (a LangGraph Triage → Investigation chain, mock LLM only, off by default) explains incidents with cited evidence and never changes scores. No real LLM adapter, dashboard or response workflow yet; see [docs/progress.md](docs/progress.md) and the roadmap checklist [docs/checklist.md](docs/checklist.md).
 
 ## Run the tests (no Docker needed)
 ```bash
@@ -11,6 +11,11 @@ cd backend && uv sync && uv run pytest -q
 # against PostgreSQL:
 SENTINELX_TEST_DATABASE_URL=postgresql+psycopg://user:pass@localhost:5432/db uv run pytest -q
 ```
+
+## Dashboard
+`docker compose up --build` also serves a dashboard on <http://localhost:8080> (alerts, incidents with evidence timelines, MITRE view, threat intel, approval queue, AI runs, audit log). See [docs/dashboard.md](docs/dashboard.md).
+
+![Overview](docs/screenshots/overview.jpg)
 
 ## Sign in
 People use a bearer token; collectors keep using `X-API-Key`. Create the first admin from the host, then log in:
@@ -41,6 +46,7 @@ The backend container runs `alembic upgrade head` before starting. If you ran an
 | POST | `/api/v1/incidents/{id}/response-actions`, `/response-actions/suggest` | propose a typed response action, or ask the Response Agent (policy or AI) for proposals; nothing runs until a different person approves |
 | POST | `/api/v1/response-actions/{id}/approve`, `/reject`, `/rollback` | approver or admin; approval is a dry run unless `real: true` and real actions are enabled |
 | GET | `/api/v1/response-actions`, `/api/v1/blocklist` | proposals and the local blocklist (advisory: SentinelX does not enforce it) |
+| GET | `/api/v1/overview`, `/api/v1/agent-runs` | exact dashboard counts; every AI run |
 | GET | `/api/v1/audit-logs` | admin only: who did what (filters `action`, `actor`, `outcome`) |
 | GET | `/api/v1/incidents` | incidents ordered by risk (filters: `status`, `min_risk`, `limit`) |
 | GET | `/api/v1/incidents/{id}` | risk breakdown, entities, alerts with grouping reason, evidence timeline |

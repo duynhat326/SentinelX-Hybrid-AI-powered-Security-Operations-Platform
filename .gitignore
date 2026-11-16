@@ -9,3 +9,4 @@ node_modules/
 graphify-out/
 .codegraph/
 .claude/
+frontend/dist/

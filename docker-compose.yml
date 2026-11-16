@@ -25,6 +25,14 @@ services:
       # Response: approval only simulates unless real actions are enabled; protected addresses/networks (comma separated) can never be targeted
       SENTINELX_RESPONSE_REAL_ACTIONS_ENABLED: ${SENTINELX_RESPONSE_REAL_ACTIONS_ENABLED:-false}
       SENTINELX_PROTECTED_IPS: ${SENTINELX_PROTECTED_IPS:-}
+      # nginx forwards the real client address so per-IP rate limits (login included) do not become one limit for everybody.
+      # "*" trusts that header from any peer: safe only because this port is published on the loopback interface alone.
+      FORWARDED_ALLOW_IPS: "*"
     ports: ["127.0.0.1:8000:8000"]
+  frontend:
+    build: ./frontend
+    depends_on:
+      backend: {condition: service_healthy}
+    ports: ["127.0.0.1:8080:8080"]  # the dashboard, open http://localhost:8080
 volumes:
   pgdata:

@@ -35,6 +35,8 @@ MATRIX = {
     ("POST", "/api/v1/response-actions/{action_id}/reject"): "approve",
     ("POST", "/api/v1/response-actions/{action_id}/rollback"): "approve",
     ("GET", "/api/v1/blocklist"): "read",
+    ("GET", "/api/v1/overview"): "read",
+    ("GET", "/api/v1/agent-runs"): "read",
     ("GET", "/api/v1/iocs"): "read",
     ("POST", "/api/v1/iocs"): "manage_iocs",
     ("DELETE", "/api/v1/iocs/{ioc_id}"): "manage_iocs",

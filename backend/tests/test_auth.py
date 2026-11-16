@@ -38,7 +38,7 @@ def test_login_returns_a_working_token_and_audits_it(client):
     r = login(client, "alice-a")
     assert r.status_code == 200 and r.json()["role"] == "analyst"
     me = client.get("/api/v1/auth/me", headers={**NO_KEY, "Authorization": f"Bearer {r.json()['token']}"})
-    assert me.json() == {"name": "user:alice-a", "role": "analyst"}
+    assert me.json() == {"name": "user:alice-a", "role": "analyst", "permissions": ["enrich", "investigate", "propose", "read"]}
     (row,) = audit_rows(action="auth.login")
     assert (row.actor, row.outcome) == ("user:alice-a", "ok")
 
