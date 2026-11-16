@@ -11,7 +11,7 @@ export default function Incidents() {
   const { data, error, loading } = useApi(() => api.incidents({ status: status || undefined, min_risk: minRisk, limit: 200 }), [status, minRisk]);
   const shown = (data ?? []).filter((i) => !sev || i.severity === sev);
   return (
-    <Page title="Incidents">
+    <Page title="Incident Review">
       <div className="filters">
         <label>Status<select value={status} onChange={(e) => setStatus(e.target.value)}><option value="open">open</option><option value="closed">closed</option><option value="">all</option></select></label>
         <label>Severity<select value={sev} onChange={(e) => setSev(e.target.value)}><option value="">all</option>{["critical", "high", "medium", "low"].map((x) => <option key={x}>{x}</option>)}</select></label>

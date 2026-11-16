@@ -12,10 +12,11 @@ import Mitre from "./pages/Mitre";
 import Overview from "./pages/Overview";
 import { href, useRoute, type Route } from "./router";
 
+// Two bars like a SIEM console: a system bar (product, search, user) and an app bar (the views of this app).
 const NAV: { name: Route["name"]; path: string; label: string; perm?: string }[] = [
-  { name: "overview", path: "", label: "Overview" }, { name: "alerts", path: "alerts", label: "Alerts" }, { name: "incidents", path: "incidents", label: "Incidents" },
-  { name: "mitre", path: "mitre", label: "MITRE" }, { name: "intel", path: "intel", label: "Threat intel" }, { name: "approvals", path: "approvals", label: "Approvals" },
-  { name: "runs", path: "agent-runs", label: "AI runs" }, { name: "audit", path: "audit", label: "Audit log", perm: "read_audit" },
+  { name: "overview", path: "", label: "Security Posture" }, { name: "incidents", path: "incidents", label: "Incident Review" }, { name: "alerts", path: "alerts", label: "Alerts" },
+  { name: "mitre", path: "mitre", label: "ATT&CK" }, { name: "intel", path: "intel", label: "Threat Intel" }, { name: "approvals", path: "approvals", label: "Approvals" },
+  { name: "runs", path: "agent-runs", label: "AI Runs" }, { name: "audit", path: "audit", label: "Audit log", perm: "read_audit" },
 ];
 
 function Page({ route }: { route: Route }): ReactNode {
@@ -43,6 +44,17 @@ function ThemeToggle() {
   return <button type="button" className="secondary theme" onClick={() => setT(t === "dark" ? "light" : t === "light" ? "" : "dark")}>Theme: {t || "auto"}</button>;
 }
 
+/** "Find" in the system bar: a quick search that opens the alerts list filtered by host, rule, title or technique. */
+function Find() {
+  const [q, setQ] = useState("");
+  return (
+    <form className="find" role="search" onSubmit={(e) => { e.preventDefault(); if (q.trim()) window.location.hash = `#/alerts?q=${encodeURIComponent(q.trim())}`; }}>
+      <label className="sr-only" htmlFor="find">Find alerts</label>
+      <input id="find" type="search" placeholder="Find: host, rule or technique" value={q} onChange={(e) => setQ(e.target.value)} />
+    </form>
+  );
+}
+
 function Shell() {
   const { me, ready, can, logout } = useAuth();
   const route = useRoute();
@@ -52,12 +64,17 @@ function Shell() {
   return (
     <>
       <a className="skip" href="#main">Skip to content</a>
-      <header className="top">
-        <strong className="brand"><img src="/brand/mark.png" alt="" width="36" height="36" />SentinelX</strong>
-        <nav aria-label="Main"><ul>{NAV.filter((n) => !n.perm || can(n.perm)).map((n) => <li key={n.name}><a href={href(n.path)} aria-current={active === n.name ? "page" : undefined}>{n.label}</a></li>)}</ul></nav>
-        <span className="who"><ThemeToggle />{me.name} ({me.role}) <button className="link" onClick={logout}>Sign out</button></span>
+      <header className="sysbar">
+        <a className="brand" href={href("")}><img src="/brand/mark.png" alt="" width="30" height="30" />SentinelX<span className="app-name">Security Operations</span></a>
+        <Find />
+        <details className="menu">
+          <summary>{me.name.replace(/^user:/, "")}<span className="role">{me.role}</span></summary>
+          <div className="menu-pop"><ThemeToggle /><button type="button" className="secondary" onClick={logout}>Sign out</button></div>
+        </details>
       </header>
-      <main id="main"><Page route={route} /></main>
+      <nav className="appbar" aria-label="Main"><ul>{NAV.filter((n) => !n.perm || can(n.perm)).map((n) => <li key={n.name}><a href={href(n.path)} aria-current={active === n.name ? "page" : undefined}>{n.label}</a></li>)}</ul></nav>
+      {/* keyed by the full hash so a filtered link (#/alerts?q=...) re-reads its filters even from the same page */}
+      <main id="main" key={window.location.hash}><Page route={route} /></main>
     </>
   );
 }

@@ -23,7 +23,7 @@ describe("signing in", () => {
     await user.type(screen.getByLabelText("Username"), "alice");
     await user.type(screen.getByLabelText("Password"), "a perfectly fine pass");
     await user.click(screen.getByRole("button", { name: "Sign in" }));
-    expect(await screen.findByRole("heading", { name: "Overview" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Security Posture" })).toBeInTheDocument();
     expect(calls[0]).toMatchObject({ method: "POST", path: "/api/v1/auth/login", body: { username: "alice", password: "a perfectly fine pass" } });
     expect(sessionStorage.getItem("sentinelx.token")).toBe("tok-new");
     expect(screen.getByText("events ingested").closest("li")).toHaveTextContent("42");
@@ -70,7 +70,7 @@ describe("pages", () => {
   it("offers the audit log only to those who may read it", async () => {
     session("viewer");
     const { unmount } = render(<App />);
-    await screen.findByRole("heading", { name: "Overview" });
+    await screen.findByRole("heading", { name: "Security Posture" });
     expect(screen.queryByRole("link", { name: "Audit log" })).toBeNull();
     unmount();
     setToken(null);
