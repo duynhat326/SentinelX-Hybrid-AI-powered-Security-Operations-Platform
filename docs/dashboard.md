@@ -50,3 +50,8 @@ Checks, also run in CI: `npm run typecheck`, `npm test`, `npm run build`.
 - Lists are capped (alerts 200, incidents 200, audit 200) with no pagination; the overview counts are exact.
 - The overview and lists are loaded on demand: there is no live push, reload the page or revisit it to refresh.
 - Timestamps use the browser's locale and time zone.
+
+## Look and fonts
+Tokens (warm canvas, coral accent, dark product surfaces, radii) come from the project's `DESIGN.md`; type and motion follow Apple's style: large tight headings, translucent blurred sticky bar, pill tabs and buttons, springy easing, light and dark by `prefers-color-scheme`, everything still at rest under `prefers-reduced-motion`. Effects are CSS only (glow in the overview hero and sign-in page, rising cards, bars that grow), so the strict CSP is unchanged; severity and scores are still written as text.
+**Font:** SF Compact (Text 400/500/600, Display 700), subset to Latin (about 60 KB each) and served from `/fonts`. Apple's licence does not allow redistributing it, so `frontend/public/fonts/` is git-ignored: copy the files in locally (a clone without them falls back to the system UI font, and the dashboard works the same). Do not publish a build that contains them.
+Dev against another backend port: `API_URL=http://127.0.0.1:8001 npm run dev`.

@@ -59,7 +59,8 @@ Defaults `w_sev=0.4`, `w_corr=0.3`, `w_ti=0.2`, `w_asset=0.1`. Override with `SE
 - Severity is per rule, set by the author, not per event content.
 - Asset criticality defaults to 3 for every host until someone sets it (SQL, no API yet), so it contributes a constant until then.
 - Renormalizing missing components raises scores slightly compared with treating them as zero. New or deleted IOCs rescore the open incidents involving that address at once; an expired verdict is only dropped from the score the next time the incident is recomputed.
-- Calibration needs labeled incidents from the lab and is part of the Milestone 8 evaluation.
+- Calibration needs labeled incidents; `docs/evaluation.md` shows what synthetic data can and cannot say about it (it cannot separate this score from plain severity).
+- **Shared addresses merge incidents.** Alerts that share an IP are linked, so unrelated hosts behind one NAT gateway, proxy or scanner address end up in one incident (found by the evaluation harness: when every host had the same source address, grouping precision fell to 0.58). Nothing excludes such addresses yet; a shared-address allowlist is future work.
 
 ## API
 | Method | Path | Returns |

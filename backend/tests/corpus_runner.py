@@ -32,7 +32,7 @@ def payload(ev: dict, i: int, host: str) -> dict:
     if k == "p":
         rec |= {"EventID": 1, "ParentImage": _path(ev["par"]), "CommandLine": ev["cmd"]}
     elif k == "n":
-        rec |= {"EventID": 3, "Protocol": "tcp", "SourceIp": "10.0.0.5", "SourcePort": str(49000 + i),
+        rec |= {"EventID": 3, "Protocol": "tcp", "SourceIp": ev.get("src", "10.0.0.5"), "SourcePort": str(49000 + i),
                 "DestinationIp": ev["dst"], "DestinationPort": str(ev["port"])}
     elif k == "r":
         rec |= {"EventID": 13, "EventType": "SetValue", "TargetObject": ev["key"], "Details": ev["val"]}

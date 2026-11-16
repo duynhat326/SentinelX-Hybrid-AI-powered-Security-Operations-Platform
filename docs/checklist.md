@@ -151,10 +151,10 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [x] D: Chuỗi tấn công nhiều giai đoạn, nhãn "synthetic" rõ ràng (cần rule mới SX-009 + Sysmon event 11, migration 0010)
 - [x] E: Prompt injection bị chặn (cần provider lab `mock-adversarial`; rủi ro còn lại được ghi rõ trong README kịch bản)
 - [x] Mỗi kịch bản có: kết quả phát hiện kỳ vọng, false positive dự kiến, dọn dẹp, test khẳng định
-- [ ] `docs/evaluation.md`: precision/recall/F1, MITRE mapping, so sánh 3 cấu hình (rule / rule+correlation / +AI) với số đo thật
-- [ ] `docs/threat-model.md`
-- [ ] README đầy đủ, ảnh chụp màn hình, kịch bản demo ngắn
-- [ ] Sao lưu/khôi phục database được ghi lại
+- [x] `docs/evaluation.md`: precision/recall/F1 (có khoảng tin cậy), so sánh 3 cấu hình với số đo thật trên dữ liệu **tổng hợp** (`backend/evaluation/run.py`, kết quả thô `docs/evaluation-results.json`); *không đo được:* chất lượng AI thật, độ đúng threat intel, false positive thật
+- [x] `docs/threat-model.md`
+- [x] README đầy đủ + ảnh chụp màn hình + kịch bản demo ngắn (`docs/demo-script.md`); *ảnh chụp là bản dashboard mới, nhưng chưa có ảnh mobile*
+- [x] Sao lưu/khôi phục database được ghi lại và chạy thử (`docs/operations.md`; *chưa chạy đúng dạng lệnh `docker compose exec` trên stack Compose*)
 
 ## Tùy chọn (tuần 9–12)
 - [ ] Threat Hunting Agent · Suricata · RAG knowledge base · thêm kịch bản/benchmark
