@@ -1,6 +1,6 @@
 # Database schema
 
-PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0007`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
+PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0008`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
 
 ```mermaid
 erDiagram
@@ -90,6 +90,17 @@ erDiagram
         string kind PK "host | ip | user | process"
         string value PK
     }
+    iocs {
+        uuid id PK
+        string kind "ip | domain | sha256, CHECK"
+        string value "canonical form"
+        string source "manual | virustotal | abuseipdb"
+        int score "0 clean .. 100 malicious, CHECK"
+        string summary "built from numbers or written by an analyst"
+        timestamptz checked_at
+        timestamptz expires_at "null for manual rows, indexed"
+        string created_by
+    }
     users {
         uuid id PK
         string username UK "3-64 of a-z 0-9 . _ -"
@@ -144,6 +155,7 @@ erDiagram
 | `security_events` | FK `asset_id` to `assets` (`ON DELETE RESTRICT`) | an asset with events cannot be deleted |
 | `incident_alerts` | PK `alert_id` (so an alert is in at most one incident), FK to `alerts` and `incidents` (`ON DELETE CASCADE`) | no duplicate grouping |
 | `incident_entities` | composite PK `(incident_id, kind, value)`, index `(kind, value)`, FK `ON DELETE CASCADE` | fast lookup of incidents sharing an entity |
+| `iocs` | unique `(kind, value, source)`, CHECK `score BETWEEN 0 AND 100`, CHECK on `kind` | one verdict per indicator and source; unknown is never stored |
 | `alert_events` | composite PK, FK to `alerts` (`ON DELETE CASCADE`), FK to `security_events` (`ON DELETE RESTRICT`) | evidence can never silently lose its event |
 
 Events are never deleted by the application. No credentials or API tokens are stored; `redact()` masks `password`, `token`, `api_key` and `secret` values before storage.
@@ -151,7 +163,7 @@ Events are never deleted by the application. No credentials or API tokens are st
 Incidents have no separate evidence table: the timeline is derived from `incident_alerts` and `alert_events` (see [correlation-and-risk.md](correlation-and-risk.md)). SQLite does not enforce `ON DELETE CASCADE` here, so the application deletes dependent rows explicitly when merging incidents.
 
 ## Planned tables (not created yet)
-`iocs` (M6B), `response_actions`, `blocklist_entries` (M6C). Roles are not a table: they are fixed in code (`app/api/auth.py`) and named by `users.role`.
+`response_actions`, `blocklist_entries` (M6C). Roles are not a table: they are fixed in code (`app/api/auth.py`) and named by `users.role`.
 
 ## Migration workflow
 Alembic reads `SENTINELX_DATABASE_URL` directly (no API key needed).

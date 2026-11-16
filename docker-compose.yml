@@ -18,6 +18,10 @@ services:
       SENTINELX_API_KEY: ${SENTINELX_API_KEY:?set SENTINELX_API_KEY in .env}
       SENTINELX_DATABASE_URL: postgresql+psycopg://sentinelx:${POSTGRES_PASSWORD}@db:5432/sentinelx
       SENTINELX_LLM_PROVIDER: ${SENTINELX_LLM_PROVIDER:-none}  # none = AI investigation off (default)
+      # Threat intelligence: lookups send an indicator to a third party, so they are off by default and still need a per-request confirmation
+      SENTINELX_TI_EXTERNAL_ENABLED: ${SENTINELX_TI_EXTERNAL_ENABLED:-false}
+      SENTINELX_VT_API_KEY: ${SENTINELX_VT_API_KEY:-}
+      SENTINELX_ABUSEIPDB_API_KEY: ${SENTINELX_ABUSEIPDB_API_KEY:-}
     ports: ["127.0.0.1:8000:8000"]
 volumes:
   pgdata:

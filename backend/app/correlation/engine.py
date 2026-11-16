@@ -5,7 +5,7 @@ incident's and they share an entity. Entities are host, ip (source or destinatio
 the exclusions below because over-linking merges unrelated incidents. An alert that bridges two incidents
 merges them into the oldest.
 """
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from ipaddress import ip_address
 
 from sqlalchemy import and_, delete, func, or_, select, text
@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import Settings
 from app.core.timeutil import utc
-from app.database.models import Alert, AlertEvent, Asset, Incident, IncidentAlert, IncidentEntity, SecurityEvent
+from app.database.models import Alert, AlertEvent, Asset, Incident, IncidentAlert, IncidentEntity, Ioc, SecurityEvent
 from app.risk_engine.score import SEVERITY_ORDER, Weights, risk_score
 
 Entity = tuple[str, str]
@@ -58,8 +58,8 @@ def alert_entities(db: Session, alert: Alert) -> set[Entity]:
     return ents
 
 
-def _refresh(db: Session, inc: Incident, cfg: Settings) -> None:
-    """Recompute everything derived from the incident's alerts."""
+def refresh_incident(db: Session, inc: Incident, cfg: Settings) -> None:
+    """Recompute everything derived from the incident's alerts and the stored threat intelligence."""
     rows = db.execute(
         select(Alert.rule_id, Alert.title, Alert.severity, Alert.first_event_at, Alert.last_event_at, Alert.host)
         .join(IncidentAlert, IncidentAlert.alert_id == Alert.id).where(IncidentAlert.incident_id == inc.id)
@@ -71,8 +71,11 @@ def _refresh(db: Session, inc: Incident, cfg: Settings) -> None:
     inc.last_seen = max(utc(r.last_event_at) for r in rows)
     criticality = db.scalar(select(func.max(Asset.criticality)).where(Asset.hostname.in_({r.host for r in rows})))
     weights = Weights(cfg.risk_weight_severity, cfg.risk_weight_correlation, cfg.risk_weight_threat_intel, cfg.risk_weight_asset)
-    # threat intelligence arrives in M6; until then it is "missing", not zero
-    inc.risk_score, inc.risk_breakdown = risk_score(inc.severity, len({r.rule_id for r in rows}), criticality, None, weights)
+    ips = set(db.scalars(select(IncidentEntity.value).where(IncidentEntity.incident_id == inc.id, IncidentEntity.kind == "ip")))
+    # worst stored verdict among the incident's addresses. No row at all means "unknown" (the component is dropped and the
+    # other weights renormalized); a stored score of 0 means "checked and clean" and counts.
+    ti = db.scalar(select(func.max(Ioc.score)).where(Ioc.kind == "ip", Ioc.value.in_(ips), or_(Ioc.expires_at.is_(None), Ioc.expires_at > datetime.now(UTC)))) if ips else None
+    inc.risk_score, inc.risk_breakdown = risk_score(inc.severity, len({r.rule_id for r in rows}), criticality, ti, weights)
 
 
 def _merge(db: Session, keep: Incident, drop: Incident) -> None:
@@ -122,14 +125,28 @@ def correlate(db: Session, alert: Alert, cfg: Settings) -> Incident:
     for kind, value in ents - have:
         db.add(IncidentEntity(incident_id=inc.id, kind=kind, value=value))
     db.flush()
-    _refresh(db, inc, cfg)
+    refresh_incident(db, inc, cfg)
     return inc
 
 
-def correlate_many(db: Session, alerts: list[Alert], cfg: Settings) -> None:
+def _lock(db: Session) -> None:
     if db.get_bind().dialect.name == "postgresql":
         # incidents span hosts, so the per-host ingestion lock is not enough; lock order is host then this one
         db.execute(text("SELECT pg_advisory_xact_lock(hashtext('sentinelx-correlation'))"))
+
+
+def rescore_for_ip(db: Session, cfg: Settings, ip: str) -> int:
+    """New threat intelligence about `ip`: recompute every open incident that involves it."""
+    _lock(db)
+    ids = set(db.scalars(select(IncidentEntity.incident_id).join(Incident, Incident.id == IncidentEntity.incident_id)
+                         .where(IncidentEntity.kind == "ip", IncidentEntity.value == ip, Incident.status == "open")))
+    for inc in db.scalars(select(Incident).where(Incident.id.in_(ids))) if ids else []:
+        refresh_incident(db, inc, cfg)
+    return len(ids)
+
+
+def correlate_many(db: Session, alerts: list[Alert], cfg: Settings) -> None:
+    _lock(db)
     for a in sorted({a.id: a for a in alerts}.values(), key=lambda a: utc(a.first_event_at)):
         correlate(db, a, cfg)
 

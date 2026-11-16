@@ -44,10 +44,10 @@ Defaults `w_sev=0.4`, `w_corr=0.3`, `w_ti=0.2`, `w_asset=0.1`. Override with `SE
 |---|---|
 | severity | highest alert severity: low 25, medium 50, high 75, critical 100 |
 | correlation | distinct detection rules in the incident: 1 gives 0, 2 gives 33.3, 3 gives 66.7, 4 or more gives 100 |
-| threat intel | provider score 0-100; **not available until Milestone 6** |
+| threat intel | the highest non-expired stored verdict (0 clean to 100 malicious) among the incident's IP addresses; see [threat-intelligence.md](threat-intelligence.md) |
 | asset | highest criticality among the incident's hosts, 1..5 mapped to 0..100 (3 is the default and gives 50) |
 
-**Missing data.** A component that is unknown is dropped and the remaining weights are renormalized; it is never silently scored as zero. Until Milestone 6 there is no threat intelligence, so today every score is computed from severity, correlation and asset with effective weights 0.5, 0.375 and 0.125. The API returns `risk_breakdown` with each component's value, weight, whether it was used, the effective weights and the list of missing components. The result is rounded half up and clamped to 0-100.
+**Missing data.** A component that is unknown is dropped and the remaining weights are renormalized; it is never silently scored as zero. With no stored threat-intelligence verdict for any of an incident's addresses (the normal case until someone adds an IOC or runs a confirmed lookup), the effective weights are 0.5, 0.375 and 0.125 for severity, correlation and asset. A stored verdict of 0 means "checked and clean": it counts and lowers the score below the unknown case. The API returns `risk_breakdown` with each component's value, weight, whether it was used, the effective weights and the list of missing components. The result is rounded half up and clamped to 0-100.
 
 **Worked examples** (both reproduced in a Compose run):
 - SSH failures then success on `web01` (SX-001 + SX-008, critical, 2 rules, asset 3): (0.4*100 + 0.3*33.3 + 0.1*50) / 0.8 = 68.75, score **69**.
@@ -58,7 +58,7 @@ Defaults `w_sev=0.4`, `w_corr=0.3`, `w_ti=0.2`, `w_asset=0.1`. Override with `SE
 - Correlation strength counts distinct rules, not how convincing the link is; a link by shared host is as strong as one by shared IP.
 - Severity is per rule, set by the author, not per event content.
 - Asset criticality defaults to 3 for every host until someone sets it (SQL, no API yet), so it contributes a constant until then.
-- Renormalizing missing components raises scores slightly compared with treating them as zero; when threat intel arrives, existing incidents will be rescored on their next change, not retroactively.
+- Renormalizing missing components raises scores slightly compared with treating them as zero. New or deleted IOCs rescore the open incidents involving that address at once; an expired verdict is only dropped from the score the next time the incident is recomputed.
 - Calibration needs labeled incidents from the lab and is part of the Milestone 8 evaluation.
 
 ## API

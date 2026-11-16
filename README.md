@@ -18,7 +18,7 @@ People use a bearer token; collectors keep using `X-API-Key`. Create the first a
 docker compose exec backend .venv/bin/python -m app.manage create-user alice admin
 curl -s localhost:8000/api/v1/auth/login -H 'content-type: application/json' -d '{"username":"alice","password":"..."}'
 ```
-Roles and what each may do: [docs/security-model.md](docs/security-model.md).
+Roles and what each may do: [docs/security-model.md](docs/security-model.md). Threat intelligence and its privacy gates: [docs/threat-intelligence.md](docs/threat-intelligence.md).
 
 ## Run with Docker Compose
 ```bash
@@ -36,6 +36,8 @@ The backend container runs `alembic upgrade head` before starting. If you ran an
 | GET | `/api/v1/rules` | detection rules and their enabled state |
 | POST | `/api/v1/auth/login`, `/logout` | sign in (public, rate limited) and out; `GET /api/v1/auth/me` shows the caller |
 | POST/GET/PATCH | `/api/v1/users` | admin only: create, list, change role or disable |
+| POST | `/api/v1/enrich`, `/api/v1/incidents/{id}/enrich` | look up an indicator or an incident's addresses: local IOC table first; VirusTotal/AbuseIPDB only if enabled, keyed and `confirm_external=true` |
+| GET/POST/DELETE | `/api/v1/iocs` | the local IOC table (writes need approver or admin) |
 | GET | `/api/v1/audit-logs` | admin only: who did what (filters `action`, `actor`, `outcome`) |
 | GET | `/api/v1/incidents` | incidents ordered by risk (filters: `status`, `min_risk`, `limit`) |
 | GET | `/api/v1/incidents/{id}` | risk breakdown, entities, alerts with grouping reason, evidence timeline |

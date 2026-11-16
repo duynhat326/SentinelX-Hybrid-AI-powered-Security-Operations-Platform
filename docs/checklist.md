@@ -103,10 +103,17 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [ ] Audit log của **hành động phản ứng** — thuộc lát 6C
 - [ ] *Chưa làm (ghi trong `docs/security-model.md`):* audit bất biến ở mức database, khóa tài khoản, đổi mật khẩu qua API, MFA
 
-### 6B - Threat intel — chưa làm
-- [ ] Bảng IOC cục bộ + cache
-- [ ] Adapter VirusTotal / AbuseIPDB (tùy chọn): timeout, rate limit, cảnh báo riêng tư trước khi gửi ngoài, không bịa dữ liệu
-- [ ] Threat Intel Agent; đưa điểm TI vào risk score
+### 6B - Threat intel — XONG, chờ bạn review (nhánh `feat/m6b-threat-intel`)
+- [x] Bảng `iocs` (IOC cục bộ `manual` + cache của provider có `expires_at`); chuẩn hóa chỉ báo IP/domain/SHA-256 và từ chối mọi thứ có thể làm sai URL provider. *Xác nhận:* `test_indicators_are_normalized`, `test_anything_that_could_alter_a_provider_url_is_rejected`, `test_manual_ioc_lifecycle_*`
+- [x] Adapter VirusTotal và AbuseIPDB: timeout, rate limit riêng mỗi provider, không theo redirect, lỗi/sai định dạng → `unavailable` và **không lưu gì**; VirusTotal 404 là `not_found`, không phải "sạch". *Xác nhận:* 10 kịch bản lỗi trong `test_provider_failures_*`, `test_unknown_to_virustotal_*`, `test_each_provider_has_its_own_rate_limit_*`
+- [x] **Cảnh báo riêng tư trước khi gửi ra ngoài:** mặc định tắt (`SENTINELX_TI_EXTERNAL_ENABLED=false`) + mỗi request phải có `confirm_external=true` (không có thì 409 kèm cảnh báo và không gửi gì) + chỉ địa chỉ public được gửi; mỗi lần gọi ngoài được audit (ai, provider, chỉ báo, kết quả; không có khóa). *Xác nhận:* `test_external_*`, `test_private_reserved_*`, `test_a_confirmed_lookup_*`, `test_secrets_never_appear_*`
+- [x] Không bịa dữ liệu và không chép chữ của provider (summary dựng từ con số). *Xác nhận:* `test_provider_text_never_reaches_*`
+- [x] Threat Intel Agent = `POST /api/v1/incidents/{id}/enrich` (code xác định, không cần LLM): tra IP của incident (tối đa 10), lấy từ bảng/cache trước
+- [x] Điểm TI vào risk score: điểm cao nhất còn hạn của các IP trong incident; **không có verdict = thiếu (chuẩn hóa lại), verdict 0 = "đã kiểm tra, sạch" và hạ điểm**; thêm/xóa IOC chấm lại ngay các incident đang mở; `GET incident` có `intel`. *Xác nhận:* `test_stored_intelligence_moves_the_risk_score_*` (44 → 55 → 44 → 35), `test_an_incident_without_any_address_*`
+- [x] Quyền: `enrich` (analyst+), `manage_iocs` (approver, admin); ma trận phân quyền phủ 5 route mới. Migration `0008`
+- [x] Đã phá 11 chỗ (bỏ xác nhận, gửi IP private, bỏ công tắc, 404 thành sạch, chép chữ provider, theo redirect, ghi khóa vào audit, bỏ audit, thiếu thành 0 hai kiểu, bỏ rate limit) và test fail mỗi lần
+- [ ] **Chưa gọi API thật của VirusTotal/AbuseIPDB**: adapter theo tài liệu công khai, chỉ test bằng transport giả. Cần thử với khóa tạm trước khi tin vào định dạng phản hồi
+- [ ] *Chưa làm:* dữ liệu MITRE ATT&CK cục bộ, nhập feed IOC, làm mới định kỳ; `risk_score` đã lưu có thể cũ cho tới lần tính lại kế tiếp khi một verdict hết hạn
 
 ### 6C - Phản ứng có duyệt — chưa làm
 - [ ] Response Agent chỉ **đề xuất** (kiểu dữ liệu chặt, allowlist hành động), mặc định dry-run
