@@ -38,7 +38,7 @@ class MockLLM:
         claims = [{"text": "Activity matches the grouped alerts.", "cites": [first.group(1)]}] if first else []
         return json.dumps({
             "priority": "high", "claims": claims, "confidence": "low", "likely_techniques": [],
-            "uncertainties": ["Mock model: no real analysis was performed."], "next_steps": ["Review the cited events."],
+            "uncertainties": ["Mock model: no real analysis was performed."], "next_steps": ["Review the cited events."], "proposals": [],
         })
 
 

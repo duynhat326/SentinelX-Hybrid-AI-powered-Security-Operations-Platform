@@ -8,12 +8,23 @@ merges them into the oldest.
 from datetime import UTC, datetime, timedelta
 from ipaddress import ip_address
 
-from sqlalchemy import and_, delete, func, or_, select, text
+from sqlalchemy import and_, delete, func, or_, select, text, update
 from sqlalchemy.orm import Session
 
 from app.core.config import Settings
 from app.core.timeutil import utc
-from app.database.models import Alert, AlertEvent, Asset, Incident, IncidentAlert, IncidentEntity, Ioc, SecurityEvent
+from app.database.models import (
+    AgentRun,
+    Alert,
+    AlertEvent,
+    Asset,
+    Incident,
+    IncidentAlert,
+    IncidentEntity,
+    Ioc,
+    ResponseAction,
+    SecurityEvent,
+)
 from app.risk_engine.score import SEVERITY_ORDER, Weights, risk_score
 
 Entity = tuple[str, str]
@@ -86,6 +97,8 @@ def _merge(db: Session, keep: Incident, drop: Incident) -> None:
         if (e.kind, e.value) not in have:
             db.add(IncidentEntity(incident_id=keep.id, kind=e.kind, value=e.value))
     db.flush()
+    for model in (ResponseAction, AgentRun):  # the merged-away incident must not take its history with it (actions also block the delete)
+        db.execute(update(model).where(model.incident_id == drop.id).values(incident_id=keep.id))
     db.execute(delete(IncidentEntity).where(IncidentEntity.incident_id == drop.id))  # SQLite does not enforce ON DELETE CASCADE
     db.delete(drop)
     db.flush()

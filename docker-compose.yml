@@ -22,6 +22,9 @@ services:
       SENTINELX_TI_EXTERNAL_ENABLED: ${SENTINELX_TI_EXTERNAL_ENABLED:-false}
       SENTINELX_VT_API_KEY: ${SENTINELX_VT_API_KEY:-}
       SENTINELX_ABUSEIPDB_API_KEY: ${SENTINELX_ABUSEIPDB_API_KEY:-}
+      # Response: approval only simulates unless real actions are enabled; protected addresses/networks (comma separated) can never be targeted
+      SENTINELX_RESPONSE_REAL_ACTIONS_ENABLED: ${SENTINELX_RESPONSE_REAL_ACTIONS_ENABLED:-false}
+      SENTINELX_PROTECTED_IPS: ${SENTINELX_PROTECTED_IPS:-}
     ports: ["127.0.0.1:8000:8000"]
 volumes:
   pgdata:

@@ -1,6 +1,6 @@
 # Database schema
 
-PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0008`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
+PostgreSQL 17 in Compose; SQLite is used for fast tests only. The schema is managed by Alembic (`backend/alembic/`, current head `0009`); the container runs `alembic upgrade head` on start. All timestamps are UTC with time zone. `raw` and `mitre` use JSONB on PostgreSQL (plain JSON on SQLite).
 
 ```mermaid
 erDiagram
@@ -12,6 +12,8 @@ erDiagram
     incidents ||--o{ incident_entities : "involves"
     incidents ||--o{ agent_runs : "investigated by"
     users ||--o{ auth_tokens : "has sessions"
+    incidents ||--o{ response_actions : "has proposals"
+    response_actions ||--o{ blocklist_entries : "created"
 
     assets {
         uuid id PK
@@ -90,6 +92,35 @@ erDiagram
         string kind PK "host | ip | user | process"
         string value PK
     }
+    response_actions {
+        uuid id PK
+        uuid incident_id FK "indexed, ON DELETE RESTRICT"
+        string type "allowlist, CHECK"
+        jsonb params "validated against the typed schema"
+        string status "proposed | rejected | simulated | executed | failed | rolled_back, CHECK, indexed"
+        string source "human | policy | agent"
+        string requested_by "person, policy or agent:provider"
+        string triggered_by "the person who proposed or asked: barred from approving"
+        timestamptz requested_at
+        string decided_by
+        timestamptz decided_at
+        string decision_reason
+        timestamptz executed_at
+        jsonb result "dry_run flag, what would or did happen"
+        text rollback_guidance
+        string idempotency_key "unique with requested_by"
+        string request_hash "same key, different request = conflict"
+    }
+    blocklist_entries {
+        uuid id PK
+        string ip
+        uuid action_id FK
+        bool active "one active row per ip (partial unique index)"
+        timestamptz created_at
+        string created_by
+        timestamptz removed_at
+        string removed_by
+    }
     iocs {
         uuid id PK
         string kind "ip | domain | sha256, CHECK"
@@ -163,7 +194,7 @@ Events are never deleted by the application. No credentials or API tokens are st
 Incidents have no separate evidence table: the timeline is derived from `incident_alerts` and `alert_events` (see [correlation-and-risk.md](correlation-and-risk.md)). SQLite does not enforce `ON DELETE CASCADE` here, so the application deletes dependent rows explicitly when merging incidents.
 
 ## Planned tables (not created yet)
-`response_actions`, `blocklist_entries` (M6C). Roles are not a table: they are fixed in code (`app/api/auth.py`) and named by `users.role`.
+Roles are not a table: they are fixed in code (`app/api/auth.py`) and named by `users.role`.
 
 ## Migration workflow
 Alembic reads `SENTINELX_DATABASE_URL` directly (no API key needed).

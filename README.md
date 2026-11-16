@@ -3,7 +3,7 @@
 > Detect. Investigate. Understand. Respond.
 
 Analyst-assistance mini-SOC: deterministic detection and correlation first, constrained AI assistance second.
-**Status: Milestone 5 (deterministic core plus advisory AI investigation).** Ingest → normalize → store → detect → alert → API. Detection, correlation into incidents and risk scoring work without any LLM. AI investigation (a LangGraph Triage → Investigation chain, mock LLM only, off by default) explains incidents with cited evidence and never changes scores. No real LLM adapter, dashboard or response workflow yet; see [docs/progress.md](docs/progress.md) and the roadmap checklist [docs/checklist.md](docs/checklist.md).
+**Status: Milestone 6 (RBAC and audit, threat intelligence, approved response actions) on top of Milestone 5 (deterministic core plus advisory AI investigation).** Ingest → normalize → store → detect → alert → API. Detection, correlation into incidents and risk scoring work without any LLM. AI investigation (a LangGraph Triage → Investigation chain, mock LLM only, off by default) explains incidents with cited evidence and never changes scores. No real LLM adapter, dashboard or response workflow yet; see [docs/progress.md](docs/progress.md) and the roadmap checklist [docs/checklist.md](docs/checklist.md).
 
 ## Run the tests (no Docker needed)
 ```bash
@@ -18,7 +18,7 @@ People use a bearer token; collectors keep using `X-API-Key`. Create the first a
 docker compose exec backend .venv/bin/python -m app.manage create-user alice admin
 curl -s localhost:8000/api/v1/auth/login -H 'content-type: application/json' -d '{"username":"alice","password":"..."}'
 ```
-Roles and what each may do: [docs/security-model.md](docs/security-model.md). Threat intelligence and its privacy gates: [docs/threat-intelligence.md](docs/threat-intelligence.md).
+Roles and what each may do: [docs/security-model.md](docs/security-model.md). Threat intelligence and its privacy gates: [docs/threat-intelligence.md](docs/threat-intelligence.md). Response proposals and approval: [docs/response-workflow.md](docs/response-workflow.md).
 
 ## Run with Docker Compose
 ```bash
@@ -38,6 +38,9 @@ The backend container runs `alembic upgrade head` before starting. If you ran an
 | POST/GET/PATCH | `/api/v1/users` | admin only: create, list, change role or disable |
 | POST | `/api/v1/enrich`, `/api/v1/incidents/{id}/enrich` | look up an indicator or an incident's addresses: local IOC table first; VirusTotal/AbuseIPDB only if enabled, keyed and `confirm_external=true` |
 | GET/POST/DELETE | `/api/v1/iocs` | the local IOC table (writes need approver or admin) |
+| POST | `/api/v1/incidents/{id}/response-actions`, `/response-actions/suggest` | propose a typed response action, or ask the Response Agent (policy or AI) for proposals; nothing runs until a different person approves |
+| POST | `/api/v1/response-actions/{id}/approve`, `/reject`, `/rollback` | approver or admin; approval is a dry run unless `real: true` and real actions are enabled |
+| GET | `/api/v1/response-actions`, `/api/v1/blocklist` | proposals and the local blocklist (advisory: SentinelX does not enforce it) |
 | GET | `/api/v1/audit-logs` | admin only: who did what (filters `action`, `actor`, `outcome`) |
 | GET | `/api/v1/incidents` | incidents ordered by risk (filters: `status`, `min_risk`, `limit`) |
 | GET | `/api/v1/incidents/{id}` | risk breakdown, entities, alerts with grouping reason, evidence timeline |

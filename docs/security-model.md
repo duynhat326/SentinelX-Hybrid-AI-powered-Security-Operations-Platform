@@ -17,9 +17,9 @@ A wrong or expired bearer token is a 401 and **never falls back** to the API key
 | `ingest` (`POST /api/v1/events`) | | | | | yes |
 | `investigate` (run the AI investigation) | | yes | yes | yes | yes |
 | `enrich` (look up indicators; external lookups also need confirmation) | | yes | yes | yes | |
-| `propose` (used by Milestone 6C) | | yes | yes | yes | |
+| `propose` (propose or suggest response actions) | | yes | yes | yes | |
 | `manage_iocs` (write the local IOC table) | | | yes | yes | |
-| `approve` (used by Milestone 6C) | | | yes | yes | |
+| `approve` (approve, reject, roll back response actions) | | | yes | yes | |
 | `manage_users`, `read_audit` | | | | yes | |
 
 Roles only ever add permissions (tested). The shared key can read, ingest and run investigations; it can never propose or approve anything or administer users. Collectors should keep using it; people should not.
@@ -38,7 +38,7 @@ docker compose exec backend .venv/bin/python -m app.manage create-user alice adm
 `set-password USER` resets a password the same way. After that, admins manage users through `/api/v1/users`.
 
 ## Audit log
-`audit_logs` records who did what, to what, with which outcome (`ok` or `denied`), from which IP: logins and failed logins, logouts, user creation and changes, **every refusal of an identified caller** (`authz.denied`, with the permission that was missing), each AI investigation run, IOC creation and deletion, and **every external threat-intelligence lookup** (caller, provider, indicator, outcome; never the key). Details are redacted and capped. Admins read it at `GET /api/v1/audit-logs` (filters `action`, `actor`, `outcome`). The application has no route or code path that updates or deletes a row. An action and its audit row commit in the same transaction; a refusal commits its audit row before answering 403.
+`audit_logs` records who did what, to what, with which outcome (`ok` or `denied`), from which IP: logins and failed logins, logouts, user creation and changes, **every refusal of an identified caller** (`authz.denied`, with the permission that was missing), each AI investigation run, IOC creation and deletion, and every response proposal, approval, execution, rejection and rollback (and each refusal), and **every external threat-intelligence lookup** (caller, provider, indicator, outcome; never the key). Details are redacted and capped. Admins read it at `GET /api/v1/audit-logs` (filters `action`, `actor`, `outcome`). The application has no route or code path that updates or deletes a row. An action and its audit row commit in the same transaction; a refusal commits its audit row before answering 403.
 
 ## Limits (not done, on purpose or not yet)
 - Audit immutability is by convention, not enforced by the database: someone with database access can edit it. A trigger or an external log sink would close that.
