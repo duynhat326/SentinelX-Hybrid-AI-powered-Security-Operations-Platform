@@ -53,3 +53,37 @@ export function riskHistogram(incidents: IncidentSummary[]) {
 }
 
 export const sum = (r: Record<string, number> | undefined) => Object.values(r ?? {}).reduce((a, b) => a + b, 0);
+
+/** Count in the selected window and in the window just before it, for a Splunk-style trend ("▲ 3 vs previous 24h"). None for "all". */
+export function trend(alerts: Alert[], range: RangeKey, keep: (a: Alert) => boolean = () => true): { now: number; prev: number } | null {
+  if (range === "all") return null;
+  const win = windowOf(alerts, range);
+  if (!win) return null;
+  const span = win[1] - win[0];
+  let now = 0, prev = 0;
+  for (const a of alerts) {
+    if (!keep(a)) continue;
+    const x = t(a);
+    if (x >= win[0] && x < win[1]) now += 1;
+    else if (x >= win[0] - span && x < win[0]) prev += 1;
+  }
+  return { now, prev };
+}
+
+/** Per-key counts in `n` time slices of the window: the sparkline column of a "top N" table. */
+export function seriesBy(alerts: Alert[], range: RangeKey, key: (a: Alert) => string[], n = 12): Map<string, number[]> {
+  const out = new Map<string, number[]>();
+  const win = windowOf(alerts, range);
+  if (!win) return out;
+  const size = Math.max(1000, (win[1] - win[0]) / n);
+  for (const a of alerts) {
+    const i = Math.floor((t(a) - win[0]) / size);
+    if (i < 0 || i >= n) continue;
+    for (const k of key(a)) {
+      const s = out.get(k) ?? Array<number>(n).fill(0);
+      s[i] += 1;
+      out.set(k, s);
+    }
+  }
+  return out;
+}

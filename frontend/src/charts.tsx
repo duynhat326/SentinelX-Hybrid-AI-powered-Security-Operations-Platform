@@ -37,11 +37,19 @@ export function Widget({ title, sub, i = 0, wide, action, children, id }: { titl
   );
 }
 
-export function Kpi({ label, value, hint, href, tone, spark, i = 0 }: { label: string; value: number; hint?: ReactNode; href?: string; tone?: string; spark?: number[]; i?: number }) {
+/** Splunk-style trend under a single value: arrow, change and the window it compares with. More alerts is shown as worse. */
+export function Trend({ now, prev, label }: { now: number; prev: number; label: string }) {
+  const d = now - prev;
+  const pct = prev ? ` (${d > 0 ? "+" : ""}${Math.round((d / prev) * 100)}%)` : "";
+  return <span className={`trend ${d > 0 ? "worse" : d < 0 ? "better" : "flat"}`}>{d > 0 ? "▲" : d < 0 ? "▼" : "■"} {d > 0 ? `+${d}` : d}{pct} <span className="muted">vs previous {label}</span></span>;
+}
+
+export function Kpi({ label, value, hint, href, tone, spark, trend, i = 0 }: { label: string; value: number; hint?: ReactNode; href?: string; tone?: string; spark?: number[]; trend?: ReactNode; i?: number }) {
   const body = (
     <>
-      <strong><Count n={value} /></strong>
       <span className="kpi-label">{label}</span>
+      <strong><Count n={value} /></strong>
+      {trend}
       {hint && <span className="kpi-hint">{hint}</span>}
       {spark && spark.some((v) => v > 0) && <Sparkline values={spark} label={`${label} over time`} />}
     </>
@@ -146,15 +154,21 @@ export function RiskRing({ n }: { n: number }) {
   );
 }
 
-export function Funnel({ steps }: { steps: { key: string; label: string; value: number; href?: string }[] }) {
-  const max = Math.max(1, ...steps.map((s) => s.value));
+
+/** A "top N" table with a sparkline column, the shape Splunk uses for top sources and top notable events. */
+export function SparkTable({ caption, cols, rows, empty = "Nothing in this window." }: { caption: string; cols: [string, string]; rows: { id: string; label: ReactNode; href?: string; spark?: number[]; value: number }[]; empty?: string }) {
+  if (rows.length === 0) return <p className="muted pad">{empty}</p>;
   return (
-    <ol className="funnel">
-      {steps.map((s, k) => (
-        <li key={s.key} style={css({ "--k": k, "--w": `${Math.max(6, (s.value / max) * 100)}%` })}>
-          <span className="fn-bar" aria-hidden="true" /><span className="fn-label">{s.href ? <a href={s.href}>{s.label}</a> : s.label}</span><b>{s.value.toLocaleString()}</b>
-        </li>
-      ))}
-    </ol>
+    <table className="sparktable">
+      <caption className="sr-only">{caption}</caption>
+      <thead><tr><th scope="col">{cols[0]}</th><th scope="col" className="spark-col">Trend</th><th scope="col" className="num">{cols[1]}</th></tr></thead>
+      <tbody>{rows.map((r) => (
+        <tr key={r.id}>
+          <td>{r.href ? <a href={r.href}>{r.label}</a> : r.label}</td>
+          <td className="spark-col">{r.spark ? <Sparkline values={r.spark} label={`${r.id} over time`} /> : null}</td>
+          <td className="num">{r.value}</td>
+        </tr>
+      ))}</tbody>
+    </table>
   );
 }

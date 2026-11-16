@@ -5,7 +5,7 @@
 > **Detect. Investigate. Understand. Respond.**
 > A hybrid AI security operations platform in miniature: deterministic detection and correlation first, constrained AI assistance second, a person always in charge of response.
 
-![Overview](docs/screenshots/overview.jpg)
+![Security Posture dashboard](docs/screenshots/overview.jpg)
 
 ## The problem
 A small team gets thousands of log lines and a flat list of alerts. Most alerts are one half of a story (a failed login here, an encoded command there), and the tools that promise to explain them with a language model are hard to trust: a model that can be talked into things by the very logs it reads should not decide severity, and should not press the button.
@@ -15,9 +15,13 @@ A small team gets thousands of log lines and a flat list of alerts. Most alerts 
 2. **Correlates into incidents.** Alerts sharing a host, address, user or process are grouped; bridging alerts merge incidents; a weighted 0 to 100 risk score explains itself.
 3. **Explains with a guarded AI.** A LangGraph Triage → Investigation chain writes a summary whose every claim must cite real alert or event ids. It cannot change severity, risk, scope or permissions, its tool calls are refused and recorded, and hostile text in the evidence is fenced. Today only offline mocks exist (including one that deliberately misbehaves).
 4. **Responds only with approval.** Response actions are a typed allowlist (no command or URL field), checked against policy twice, dry-run by default, and need a *different* person to approve. Real effects need a kill switch that is off by default.
-5. **Shows its work.** A dashboard with the evidence timeline, MITRE ATT&CK coverage, threat intelligence, the approval queue, every AI run and the audit log.
+5. **Shows its work.** A SIEM-style dashboard at <http://localhost:8080>: a *Security Posture* page (single values with trends, alerts over time, top detections, hosts and techniques with sparklines, incidents to review) and pages for incident review with the evidence timeline, MITRE ATT&CK coverage, threat intelligence, the approval queue, every AI run and the audit log.
 
-![Incident](docs/screenshots/incident.jpg)
+| Security Posture, widgets | Incident Review | ATT&CK | Sign-in |
+|---|---|---|---|
+| ![Widgets](docs/screenshots/overview-widgets.jpg) | ![Incident](docs/screenshots/incident.jpg) | ![ATT&CK](docs/screenshots/mitre.jpg) | ![Sign-in](docs/screenshots/login.jpg) |
+
+The layout follows SIEM consoles (system bar with quick find, app bar of views, global inputs, flat panels) after Splunk's published dashboard guidance; no Splunk code or artwork is used. Details in [docs/dashboard.md](docs/dashboard.md).
 
 ## Architecture
 ```mermaid
@@ -117,7 +121,7 @@ Details, false positives and known gaps: [docs/detection-rules.md](docs/detectio
 - **Detection is string and path based** and misses obfuscation, renamed binaries and unusual paths (documented known gaps). The evaluation is synthetic.
 - **Single shared collector key, in-memory per-process rate limits, no MFA or SSO, audit immutability by convention.** The full list is in [docs/threat-model.md](docs/threat-model.md).
 - Alerts that share an address (NAT, proxies) merge unrelated hosts into one incident.
-- The dashboard has no live updates or pagination (lists are capped at 200), and keeps its token in `sessionStorage`.
+- The Security Posture page refreshes itself every 30 s and its charts use the latest 200 alerts and open incidents (tiles are exact); other pages do not refresh and lists have no pagination. The token is kept in `sessionStorage`.
 - SF Compact (the dashboard font) is not redistributable and is not in the repository; without it the dashboard falls back to the system font ([docs/dashboard.md](docs/dashboard.md)).
 
 ## Documentation
