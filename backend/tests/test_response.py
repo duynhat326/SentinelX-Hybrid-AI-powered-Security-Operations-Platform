@@ -269,7 +269,10 @@ def test_nothing_to_roll_back_returns_the_manual_guidance(client, who):
     sim = decide(client, who, "app", propose(client, who, "ana", iid, IPBLOCK).json()["id"])
     assert sim.json()["status"] == "simulated"
     r = decide(client, who, "app", sim.json()["id"], "rollback")
-    assert r.status_code == 409 and "firewall" in r.json()["detail"]["reasons"][0]
+    assert r.status_code == 409 and "dry run" in r.json()["detail"]["reasons"][0] and "firewall" not in r.json()["detail"]["reasons"][0]
+    # a blocklist entry that was only simulated must not be told to "deactivate the entry": there is none
+    sim_block = decide(client, who, "app", propose(client, who, "ana", iid, BLOCK).json()["id"]).json()["id"]
+    assert "dry run" in decide(client, who, "app", sim_block, "rollback").json()["detail"]["reasons"][0]
     assert decide(client, who, "app", propose(client, who, "ana", iid, REPORT).json()["id"], "rollback").status_code == 409  # still proposed
 
 

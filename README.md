@@ -12,6 +12,9 @@ cd backend && uv sync && uv run pytest -q
 SENTINELX_TEST_DATABASE_URL=postgresql+psycopg://user:pass@localhost:5432/db uv run pytest -q
 ```
 
+## Try it end to end
+A step-by-step test guide (in Vietnamese) with synthetic demo data and the expected results is in [docs/manual-testing.md](docs/manual-testing.md); the seed script is `lab/seed_demo.py` (standard library only).
+
 ## Dashboard
 `docker compose up --build` also serves a dashboard on <http://localhost:8080> (alerts, incidents with evidence timelines, MITRE view, threat intel, approval queue, AI runs, audit log). See [docs/dashboard.md](docs/dashboard.md).
 

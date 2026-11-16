@@ -163,8 +163,9 @@ def rollback(db: Session, who: Principal, action_id, request: Request | None) ->
     if a.status == "rolled_back":
         return a
     if a.status != "executed" or a.type != "add_blocklist_entry":
+        dry = "It was approved as a dry run, so nothing was changed and there is nothing to undo."
         _deny(db, who, request, a, "rollback", 409, "there is nothing to roll back automatically" if a.status != "executed" else "no automatic rollback for this type",
-              [a.rollback_guidance])
+              [dry if a.status == "simulated" else a.rollback_guidance])
     entry = db.scalar(select(BlocklistEntry).where(BlocklistEntry.action_id == a.id, BlocklistEntry.active))
     if entry:
         entry.active, entry.removed_at, entry.removed_by = False, datetime.now(UTC), who.name
