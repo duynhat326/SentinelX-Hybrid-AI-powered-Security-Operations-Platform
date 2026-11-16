@@ -5,7 +5,7 @@
 > **Detect. Investigate. Understand. Respond.**
 > A hybrid AI security operations platform in miniature: deterministic detection and correlation first, constrained AI assistance second, a person always in charge of response.
 
-![Security Posture dashboard](docs/screenshots/overview.jpg)
+![Security Posture dashboard](docs/screenshots/overview.png)
 
 ## The problem
 A small team gets thousands of log lines and a flat list of alerts. Most alerts are one half of a story (a failed login here, an encoded command there), and the tools that promise to explain them with a language model are hard to trust: a model that can be talked into things by the very logs it reads should not decide severity, and should not press the button.
@@ -19,7 +19,7 @@ A small team gets thousands of log lines and a flat list of alerts. Most alerts 
 
 | Security Posture, widgets | Incident Review | ATT&CK | Sign-in |
 |---|---|---|---|
-| ![Widgets](docs/screenshots/overview-widgets.jpg) | ![Incident](docs/screenshots/incident.jpg) | ![ATT&CK](docs/screenshots/mitre.jpg) | ![Sign-in](docs/screenshots/login.jpg) |
+| ![Widgets](docs/screenshots/overview-widgets.png) | ![Incident](docs/screenshots/incident.png) | ![ATT&CK](docs/screenshots/mitre.png) | ![Sign-in](docs/screenshots/login.png) |
 
 The layout follows SIEM consoles (system bar with quick find, app bar of views, global inputs, flat panels) after Splunk's published dashboard guidance; no Splunk code or artwork is used. Details in [docs/dashboard.md](docs/dashboard.md).
 
