@@ -67,6 +67,7 @@ sequenceDiagram
 ```
 
 ## Key decisions
+- **Modular monolith.** FastAPI and SQLAlchemy 2, PostgreSQL in Compose, SQLite only for fast tests; no Redis or microservices unless later justified. Python 3.12 or newer; `uv.lock` pins dependencies. Sigma rule import is deferred.
 - **Deterministic core.** Rules are Python callables with metadata (id, severity, MITRE, references, enabled). The LLM (M5+) only explains evidence and never changes severity, scores or permissions.
 - **Idempotent ingestion.** A SHA-256 of the redacted raw record is unique; resending is a no-op.
 - **Concurrency.** On PostgreSQL, ingestion takes a per-host advisory lock so concurrent events see each other (no duplicate alerts, no missed thresholds). Trade-off: per-host serialization.
@@ -79,6 +80,7 @@ sequenceDiagram
 - **Response.** Typed proposals only (no action carries a command), policy checked at proposal and at approval, approval by a person other than the requester, dry run by default, a switch for real effects, idempotent, rollback guidance, every transition audited. The Response Agent can only propose. See [response-workflow.md](response-workflow.md).
 - **Dashboard.** A React app served by nginx, which proxies `/api` so everything is one origin, with a strict CSP. It reads the caller's permissions from `/api/v1/auth/me` to hide what they cannot do; the server still enforces every permission. See [dashboard.md](dashboard.md).
 - **Untrusted input.** Every field is validated or dropped; secrets are redacted before storage; raw size is capped. Usernames in sshd lines are attacker-controlled, so the line is parsed from its end (the real `from <ip> port N` comes last) and a username containing a fake one cannot change the recorded source IP. Field sizes never decide whether an event is stored: indexed columns are bounded (hostname over 255 chars is rejected with 422, usernames truncated to 255), path columns are unbounded `TEXT`, and a database `DataError` becomes a 422, never a silent 500 that would drop the event.
+- **Risks accepted.** No real Windows or Wazuh lab was available, so Sysmon and Wazuh inputs are fixtures; syslog has no year or time zone (current UTC year assumed); any target in the original spec is a goal, never a result.
 - **Shortcuts to revisit:** single shared API key (RBAC in M6), in-memory rate limit (per process), no rule-toggle API (flip `detection_rules.enabled` in SQL), syslog year assumed current UTC year.
 
 ## Code map

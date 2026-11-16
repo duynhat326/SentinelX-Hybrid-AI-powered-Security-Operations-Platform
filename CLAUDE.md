@@ -58,4 +58,4 @@ Untrusted-input rules (see `docs/architecture.md` "Key decisions"): all log fiel
 
 ## Docs
 
-`docs/` is the source of truth for design: `architecture.md`, `detection-rules.md`, `correlation-and-risk.md`, `database-schema.md`, `implementation-plan.md`, `progress.md`, `checklist.md`. Update the relevant doc when behavior changes. Known shortcuts: single shared API key, per-process rate limit, no rule-toggle API (flip `detection_rules.enabled` in SQL), syslog year assumed to be the current UTC year.
+`docs/` is the source of truth for design: `architecture.md`, `detection-rules.md`, `correlation-and-risk.md`, `database-schema.md`, `testing.md`, `progress.md`, `checklist.md`. Update the relevant doc when behavior changes. Known shortcuts: single shared API key, per-process rate limit, no rule-toggle API (flip `detection_rules.enabled` in SQL), syslog year assumed to be the current UTC year.
