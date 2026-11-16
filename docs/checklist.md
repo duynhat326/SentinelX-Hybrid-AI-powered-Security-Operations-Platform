@@ -158,3 +158,14 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 
 ## Tùy chọn (tuần 9–12)
 - [ ] Threat Hunting Agent · Suricata · RAG knowledge base · thêm kịch bản/benchmark
+
+## M9 - Chuyển từ mock sang triển khai thật (plan: `docs/roadmap-real-world.md`)
+- [x] Phase 0: quyết định lab, model AI nội bộ, tường lửa Linux (nftables), giữ log 30/180/365 ngày, UTC, 2 người duyệt (`docs/decisions.md`); *còn mở:* phần cứng máy lab, tên 2 người duyệt, sơ đồ mạng lab
+- [ ] Phase 1: forwarder Linux và Windows (Wazuh/Winlogbeat + Sysmon), script đẩy alert Wazuh, parser cho event thật, sửa năm và múi giờ syslog, import tài sản và API criticality. Đạt: 5 host forward 7 ngày, lỗi parse dưới 1%, không trùng
+- [ ] Phase 2: baseline 2–4 tuần, đo false positive theo rule, allowlist, API bật/tắt rule, allowlist địa chỉ dùng chung. Đạt: mỗi rule có quyết định giữ/sửa/tắt
+- [ ] Phase 3: adapter AI thật (timeout, che dữ liệu, giới hạn chi phí, `PROMPT_VERSION`), đánh giá trên ≥30 incident gán nhãn. Dưới ngưỡng thì AI tắt cho người dùng
+- [ ] Phase 4: khóa VirusTotal/AbuseIPDB thật, quota, test trên IP công khai đã duyệt, audit mọi lần gửi ra ngoài
+- [ ] Phase 5: executor chặn IP bằng nftables (dry run, kill switch, rollback thật, idempotency). Cô lập host vẫn mô phỏng đến khi có EDR
+- [ ] Phase 6: khóa riêng cho collector (thu hồi được), TLS, cookie HttpOnly + CSRF, MFA TOTP, đổi mật khẩu, khóa tạm, audit bất biến ở DB, rate limit dùng chung, secret ngoài `.env`, quét dependency, pen test
+- [ ] Phase 7: sao lưu có lịch và mã hóa, thử khôi phục, job retention, metric/alert cho SentinelX, runbook, dashboard cập nhật trực tiếp và phân trang, quản lý người dùng
+- [ ] Pilot 2 tuần trên nhóm host nhỏ, AI và phản ứng ở chế độ đề xuất
