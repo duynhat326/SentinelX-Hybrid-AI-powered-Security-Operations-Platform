@@ -8,6 +8,7 @@ export const TECHNIQUES: Record<string, { name: string; tactics: string[] }> = {
   "T1547.001": { name: "Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder", tactics: ["Persistence", "Privilege Escalation"] },
   T1071: { name: "Application Layer Protocol", tactics: ["Command and Control"] },
   "T1204.002": { name: "User Execution: Malicious File", tactics: ["Execution"] },
+  T1105: { name: "Ingress Tool Transfer", tactics: ["Command and Control"] },
   T1078: { name: "Valid Accounts", tactics: ["Initial Access", "Persistence", "Privilege Escalation", "Defense Evasion"] },
 };
 

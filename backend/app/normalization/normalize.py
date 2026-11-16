@@ -36,6 +36,7 @@ class NormalizedEvent(BaseModel):
     command_line: str | None = None
     registry_key: str | None = None
     registry_value: str | None = None
+    file_path: str | None = None
 
     @field_validator("user")
     @classmethod
@@ -107,7 +108,7 @@ _REG_ACTIONS = {"CreateKey": "create_key", "DeleteKey": "delete_key", "SetValue"
 
 
 def normalize_sysmon(rec: dict) -> NormalizedEvent:
-    """Sysmon events 1 (process create), 3 (network connect), 12/13 (registry), as JSON."""
+    """Sysmon events 1 (process create), 3 (network connect), 11 (file create), 12/13 (registry), as JSON."""
     try:
         eid = int(rec["EventID"])
         base: dict = {
@@ -125,6 +126,8 @@ def normalize_sysmon(rec: dict) -> NormalizedEvent:
                 src_port=_int(rec.get("SourcePort")), dst_ip=_opt(rec.get("DestinationIp")),
                 dst_port=_int(rec.get("DestinationPort")),
             )
+        if eid == 11:
+            return NormalizedEvent(**base, category="file", action="create", file_path=redact(str(rec["TargetFilename"])))
         if eid in (12, 13):
             return NormalizedEvent(
                 **base, category="registry", action=_REG_ACTIONS[str(rec["EventType"])],
@@ -133,7 +136,7 @@ def normalize_sysmon(rec: dict) -> NormalizedEvent:
             )
     except (KeyError, ValueError, TypeError) as e:
         raise NormalizationError(f"invalid sysmon record: {e!r}") from e
-    raise NormalizationError(f"unsupported Sysmon EventID {rec.get('EventID')!r} (supported: 1, 3, 12, 13)")
+    raise NormalizationError(f"unsupported Sysmon EventID {rec.get('EventID')!r} (supported: 1, 3, 11, 12, 13)")
 
 
 def normalize_wazuh(alert: dict, max_raw: int) -> tuple[NormalizedEvent, dict]:

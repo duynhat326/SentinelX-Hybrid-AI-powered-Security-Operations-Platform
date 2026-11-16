@@ -87,7 +87,7 @@ def test_asset_created_once_per_host(client):
 
 def test_rules_listed_and_disabling_stops_alerts(client):
     rules = {r["id"]: r for r in client.get("/api/v1/rules").json()}
-    assert set(rules) == {f"SX-00{i}" for i in range(1, 9)} and rules["SX-001"]["enabled"] and rules["SX-001"]["mitre"] == ["T1110"]
+    assert set(rules) == {f"SX-00{i}" for i in range(1, 10)} and rules["SX-001"]["enabled"] and rules["SX-001"]["mitre"] == ["T1110"]
     with get_factory()() as db:
         db.get(DetectionRule, "SX-001").enabled = False
         db.commit()

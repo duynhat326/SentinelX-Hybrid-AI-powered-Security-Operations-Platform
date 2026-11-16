@@ -1,0 +1,318 @@
+{
+ "rule": "SX-009",
+ "description": "Synthetic labeled cases. A regression corpus, not a real-world evaluation.",
+ "cases": [
+  {
+   "id": "SX-009-m01",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "PowerShell drops an exe in Temp",
+   "events": [
+    {
+     "k": "fc",
+     "img": "powershell.exe",
+     "path": "C:\\Users\\bob\\AppData\\Local\\Temp\\update.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-m02",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Word writes an exe into Downloads",
+   "events": [
+    {
+     "k": "fc",
+     "img": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+     "path": "C:\\Users\\alice\\Downloads\\invoice.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-m03",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "mshta writes a dll into ProgramData",
+   "events": [
+    {
+     "k": "fc",
+     "img": "mshta.exe",
+     "path": "C:\\ProgramData\\svc.dll"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-m04",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "wscript writes a script into Public",
+   "events": [
+    {
+     "k": "fc",
+     "img": "wscript.exe",
+     "path": "C:\\Users\\Public\\run.vbs"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-m05",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "certutil writes an exe into Temp",
+   "events": [
+    {
+     "k": "fc",
+     "img": "certutil.exe",
+     "path": "C:\\Windows\\Temp\\a.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-m06",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "rundll32 writes a screensaver into AppData",
+   "events": [
+    {
+     "k": "fc",
+     "img": "rundll32.exe",
+     "path": "C:\\Users\\bob\\AppData\\Roaming\\x.scr"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-m07",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "Excel writes a js file into Temp",
+   "events": [
+    {
+     "k": "fc",
+     "img": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE",
+     "path": "C:\\Users\\bob\\AppData\\Local\\Temp\\p.js"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-m08",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "pwsh writes a batch file on the Desktop",
+   "events": [
+    {
+     "k": "fc",
+     "img": "pwsh.exe",
+     "path": "C:\\Users\\bob\\Desktop\\t.bat"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-m09",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "note": "upper-case path and extension",
+   "events": [
+    {
+     "k": "fc",
+     "img": "POWERSHELL.EXE",
+     "path": "C:\\USERS\\BOB\\APPDATA\\LOCAL\\TEMP\\SETUP.EXE"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-m10",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "msbuild is not in the dropper list",
+   "events": [
+    {
+     "k": "fc",
+     "img": "msbuild.exe",
+     "path": "C:\\Users\\bob\\AppData\\Local\\Temp\\b.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-m11",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "an archive is not an executable extension",
+   "events": [
+    {
+     "k": "fc",
+     "img": "powershell.exe",
+     "path": "C:\\Users\\bob\\AppData\\Local\\Temp\\payload.zip"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-m12",
+   "rule": "SX-009",
+   "label": "malicious",
+   "synthetic": true,
+   "known_gap": true,
+   "note": "a folder outside the user-writable list",
+   "events": [
+    {
+     "k": "fc",
+     "img": "powershell.exe",
+     "path": "C:\\Windows\\Tasks\\job.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-b01",
+   "rule": "SX-009",
+   "label": "benign",
+   "synthetic": true,
+   "note": "browser download of an installer (browsers are not droppers)",
+   "events": [
+    {
+     "k": "fc",
+     "img": "chrome.exe",
+     "path": "C:\\Users\\bob\\Downloads\\setup.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-b02",
+   "rule": "SX-009",
+   "label": "benign",
+   "synthetic": true,
+   "note": "PowerShell writes a text log to Temp",
+   "events": [
+    {
+     "k": "fc",
+     "img": "powershell.exe",
+     "path": "C:\\Users\\bob\\AppData\\Local\\Temp\\log.txt"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-b03",
+   "rule": "SX-009",
+   "label": "benign",
+   "synthetic": true,
+   "note": "PowerShell writes a script to Program Files",
+   "events": [
+    {
+     "k": "fc",
+     "img": "powershell.exe",
+     "path": "C:\\Program Files\\App\\run.ps1"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-b04",
+   "rule": "SX-009",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Word saves a document",
+   "events": [
+    {
+     "k": "fc",
+     "img": "C:\\Program Files\\Microsoft Office\\root\\Office16\\WINWORD.EXE",
+     "path": "C:\\Users\\alice\\Documents\\report.docx"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-b05",
+   "rule": "SX-009",
+   "label": "benign",
+   "synthetic": true,
+   "note": "Excel temp file",
+   "events": [
+    {
+     "k": "fc",
+     "img": "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE",
+     "path": "C:\\Users\\alice\\AppData\\Local\\Temp\\~tmp123.tmp"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-b06",
+   "rule": "SX-009",
+   "label": "benign",
+   "synthetic": true,
+   "note": "installer writes an exe into Program Files",
+   "events": [
+    {
+     "k": "fc",
+     "img": "setup.exe",
+     "path": "C:\\Program Files\\Vendor\\app.exe"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-b07",
+   "rule": "SX-009",
+   "label": "benign",
+   "synthetic": true,
+   "note": "svchost writes a dll into System32",
+   "events": [
+    {
+     "k": "fc",
+     "img": "svchost.exe",
+     "path": "C:\\Windows\\System32\\x.dll"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-b08",
+   "rule": "SX-009",
+   "label": "benign",
+   "synthetic": true,
+   "note": "wscript writes a text file",
+   "events": [
+    {
+     "k": "fc",
+     "img": "wscript.exe",
+     "path": "C:\\Users\\Public\\notes.txt"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-b09",
+   "rule": "SX-009",
+   "label": "benign",
+   "synthetic": true,
+   "note": "PowerShell writes a log under ProgramData",
+   "events": [
+    {
+     "k": "fc",
+     "img": "powershell.exe",
+     "path": "C:\\ProgramData\\Vendor\\agent.log"
+    }
+   ]
+  },
+  {
+   "id": "SX-009-b10",
+   "rule": "SX-009",
+   "label": "benign",
+   "synthetic": true,
+   "note": "a process creation event, not a file event",
+   "events": [
+    {
+     "k": "p",
+     "img": "powershell.exe",
+     "par": "cmd.exe",
+     "cmd": "powershell.exe Get-Date"
+    }
+   ]
+  }
+ ]
+}

@@ -126,6 +126,18 @@ def _office_spawns_shell(db: Session, ev: SecurityEvent, cfg: Settings) -> Match
     return None
 
 
+_DROPPERS = _PS_EXE | _OFFICE | {"wscript.exe", "cscript.exe", "mshta.exe", "rundll32.exe", "regsvr32.exe", "certutil.exe", "bitsadmin.exe"}
+_EXEC_FILE = re.compile(r"(?i)\.(?:exe|dll|scr|js|jse|vbs|vbe|hta|ps1|bat|cmd)$")
+_USER_WRITABLE = re.compile(r"(?i)\\(?:Users\\[^\\]+\\(?:AppData|Downloads|Desktop|Documents)|Users\\Public|ProgramData|Temp)\\")
+
+
+def _dropped_executable(db: Session, ev: SecurityEvent, cfg: Settings) -> Match | None:
+    if (ev.source == "sysmon" and ev.category == "file" and ev.file_path and _base(ev.process_name) in _DROPPERS
+            and _EXEC_FILE.search(ev.file_path) and _USER_WRITABLE.search(ev.file_path)):
+        return _single(ev)
+    return None
+
+
 def _fail_then_success(db: Session, ev: SecurityEvent, cfg: Settings) -> Match | None:
     if ev.source != "linux_auth" or ev.category != "authentication" or not ev.src_ip:
         return None
@@ -160,6 +172,8 @@ RULES: list[Rule] = [
          ["https://attack.mitre.org/techniques/T1071/"], _lolbin_outbound, tags=["windows", "command-and-control"]),
     Rule("SX-007", "Office application spawning a shell or script host", "high", ["T1204.002"],
          ["https://attack.mitre.org/techniques/T1204/002/"], _office_spawns_shell, tags=["windows", "execution"]),
+    Rule("SX-009", "Script host or Office application writing an executable to a user-writable folder", "medium", ["T1105"],
+         ["https://attack.mitre.org/techniques/T1105/"], _dropped_executable, tags=["windows", "command-and-control"]),
     Rule("SX-008", "Repeated SSH failures followed by a successful login", "critical", ["T1110", "T1078"],
          ["https://attack.mitre.org/techniques/T1110/", "https://attack.mitre.org/techniques/T1078/"],
          _fail_then_success, tags=["linux", "auth"]),

@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     risk_weight_correlation: float = Field(default=0.3, ge=0)
     risk_weight_threat_intel: float = Field(default=0.2, ge=0)
     risk_weight_asset: float = Field(default=0.1, ge=0)
-    llm_provider: Literal["none", "mock"] = "none"  # none = AI off; detection and scoring never depend on it
+    llm_provider: Literal["none", "mock", "mock-adversarial"] = "none"  # none = AI off; mock-adversarial is a lab double that misbehaves on purpose
     llm_max_prompt_chars: int = Field(default=12000, ge=2000)
     llm_timeout_seconds: float = Field(default=30, gt=0, le=300)  # passed to the provider for each call
     llm_rate_limit_per_minute: int = Field(default=10, ge=1)  # per client IP; each run is two model calls
