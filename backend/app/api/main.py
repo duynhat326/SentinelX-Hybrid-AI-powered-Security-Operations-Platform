@@ -14,6 +14,7 @@ from app.api.agents import router as agents_router
 from app.api.auth import require
 from app.api.incidents import router as incidents_router
 from app.api.intel import router as intel_router
+from app.api.overview import router as overview_router
 from app.api.ratelimit import rate_limit
 from app.api.response import router as response_router
 from app.api.users import router as users_router
@@ -50,6 +51,7 @@ app.include_router(agents_router)
 app.include_router(users_router)
 app.include_router(intel_router)
 app.include_router(response_router)
+app.include_router(overview_router)
 try:
     _origins = get_settings().cors_origins
 except Exception:  # settings are validated again in lifespan; keep import-time safe for tooling

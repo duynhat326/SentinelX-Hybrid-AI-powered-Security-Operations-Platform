@@ -37,6 +37,9 @@ docker compose exec backend .venv/bin/python -m app.manage create-user alice adm
 ```
 `set-password USER` resets a password the same way. After that, admins manage users through `/api/v1/users`.
 
+## The dashboard
+People sign in through the dashboard with the same bearer tokens; the page hides controls by permission (from `/api/v1/auth/me`) but the server decides. The token is kept in `sessionStorage`; see [dashboard.md](dashboard.md) for that trade-off and for the proxy headers.
+
 ## Audit log
 `audit_logs` records who did what, to what, with which outcome (`ok` or `denied`), from which IP: logins and failed logins, logouts, user creation and changes, **every refusal of an identified caller** (`authz.denied`, with the permission that was missing), each AI investigation run, IOC creation and deletion, and every response proposal, approval, execution, rejection and rollback (and each refusal), and **every external threat-intelligence lookup** (caller, provider, indicator, outcome; never the key). Details are redacted and capped. Admins read it at `GET /api/v1/audit-logs` (filters `action`, `actor`, `outcome`). The application has no route or code path that updates or deletes a row. An action and its audit row commit in the same transaction; a refusal commits its audit row before answering 403.
 

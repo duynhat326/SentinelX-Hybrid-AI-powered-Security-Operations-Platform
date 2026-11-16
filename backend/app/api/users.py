@@ -8,7 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.audit import audit
-from app.api.auth import Principal, current_principal, require
+from app.api.auth import PERMISSIONS, Principal, current_principal, require
 from app.api.ratelimit import make_limiter
 from app.core.config import Settings, get_settings
 from app.core.security import (
@@ -88,7 +88,8 @@ def logout(request: Request, who: Principal = Depends(current_principal), db: Se
 
 @router.get("/api/v1/auth/me")
 def me(who: Principal = Depends(current_principal)) -> dict:
-    return {"name": who.name, "role": who.role}
+    # the dashboard hides what a caller may not do; the server still enforces every permission
+    return {"name": who.name, "role": who.role, "permissions": sorted(PERMISSIONS[who.role])}
 
 
 @router.post("/api/v1/users", response_model=UserOut, status_code=201)
