@@ -145,12 +145,12 @@ Cách dùng: làm xong một chức năng → chạy lệnh xác nhận → tick
 - [ ] *Chưa làm:* ESLint, phân trang (danh sách giới hạn 200), cập nhật trực tiếp (phải tải lại), token trong HttpOnly cookie (cần backend hỗ trợ), quản lý người dùng trong giao diện (dùng CLI/API)
 
 ## M8 - Kịch bản demo, đánh giá, phát hành
-- [ ] A: SSH brute-force → 1 incident
-- [ ] B: PowerShell đáng ngờ (dữ liệu giả lành tính) + ngữ cảnh process cha–con
-- [ ] C: Registry persistence trong VM Windows cô lập, có bước dọn dẹp
-- [ ] D: Chuỗi tấn công nhiều giai đoạn, nhãn "synthetic" rõ ràng
-- [ ] E: Prompt injection bị chặn
-- [ ] Mỗi kịch bản có: kết quả phát hiện kỳ vọng, false positive dự kiến, dọn dẹp, test khẳng định
+- [x] A: SSH brute-force → 1 incident (`lab/scenarios`, `test_scenarios.py`)
+- [x] B: PowerShell đáng ngờ (dữ liệu giả lành tính) + ngữ cảnh process cha–con
+- [x] C: Registry persistence: fixture đã có test; *các bước trên VM Windows thật (kèm dọn dẹp `reg delete`) đã ghi trong `lab/scenarios/README.md` nhưng chưa chạy*
+- [x] D: Chuỗi tấn công nhiều giai đoạn, nhãn "synthetic" rõ ràng (cần rule mới SX-009 + Sysmon event 11, migration 0010)
+- [x] E: Prompt injection bị chặn (cần provider lab `mock-adversarial`; rủi ro còn lại được ghi rõ trong README kịch bản)
+- [x] Mỗi kịch bản có: kết quả phát hiện kỳ vọng, false positive dự kiến, dọn dẹp, test khẳng định
 - [ ] `docs/evaluation.md`: precision/recall/F1, MITRE mapping, so sánh 3 cấu hình (rule / rule+correlation / +AI) với số đo thật
 - [ ] `docs/threat-model.md`
 - [ ] README đầy đủ, ảnh chụp màn hình, kịch bản demo ngắn

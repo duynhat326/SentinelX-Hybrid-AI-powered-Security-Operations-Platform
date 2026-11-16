@@ -75,6 +75,7 @@ class SecurityEvent(Base):
     command_line: Mapped[str | None] = mapped_column(Text)
     registry_key: Mapped[str | None] = mapped_column(Text)
     registry_value: Mapped[str | None] = mapped_column(Text)  # Sysmon "Details" of a SetValue, redacted
+    file_path: Mapped[str | None] = mapped_column(Text)  # Sysmon 11 TargetFilename
     raw: Mapped[dict] = mapped_column(JsonType)  # redacted + truncated original record
 
 

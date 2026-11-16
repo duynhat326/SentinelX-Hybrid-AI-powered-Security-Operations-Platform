@@ -12,6 +12,7 @@ Rules are deterministic Python functions in `backend/app/detection/engine.py`. T
 | SX-006 | Script host or LOLBin connecting to an external address | medium | T1071 | Sysmon 3 |
 | SX-007 | Office application spawning a shell or script host | high | T1204.002 | Sysmon 1 |
 | SX-008 | Repeated SSH failures followed by a successful login | critical | T1110, T1078 | sshd auth logs |
+| SX-009 | Script host or Office application writing an executable to a user-writable folder | medium | T1105 | Sysmon 11 |
 
 Events can arrive directly or relayed by Wazuh (`source: "wazuh"`); relayed events are normalized first, so every rule treats them the same.
 
@@ -61,9 +62,15 @@ An alert is keyed by `(rule_id, host, group_key)`. A new matching event is added
 - **Expected false positives:** a user who forgets a password, tries many times, then succeeds from the same address.
 - **Known gaps:** distributed attempts from several IPs followed by a success from another.
 
+### SX-009 Script host or Office application writing an executable to a user-writable folder
+- **Fires when** Sysmon event 11 (file create) shows PowerShell, a script host (`wscript`, `cscript`, `mshta`), `rundll32`, `regsvr32`, `certutil`, `bitsadmin` or an Office application writing a file with an executable or script extension (`exe dll scr js jse vbs vbe hta ps1 bat cmd`) under `Users\<name>\AppData`, `Downloads`, `Desktop`, `Documents`, `Users\Public`, `ProgramData` or any `Temp`.
+- **Expected false positives:** administration scripts that write tools or scripts to Temp or ProgramData; installers launched through a script host. Browsers and installers themselves are deliberately not droppers.
+- **Known gaps:** other writers (for example `msbuild`), archives and other payload types, folders outside that list (for example `C:\Windows\Tasks`).
+- **ATT&CK:** the mapping to T1105 (Ingress Tool Transfer) is a heuristic: the rule sees a file written, not where it came from.
+
 ## Labeled corpus
 
-`backend/tests/corpus/sx-00N.json` holds 149 synthetic cases (294 events): 80 malicious, 69 benign, including 13 **known gaps**, which are malicious techniques a rule deliberately does not cover. The test `test_every_corpus_case_behaves_as_labeled` replays every case through the API and requires each rule to behave as labeled; known gaps must still be missed, so improving a rule means flipping that case on purpose.
+`backend/tests/corpus/sx-00N.json` holds 171 synthetic cases (316 events): 92 malicious, 79 benign, including 16 **known gaps**, which are malicious techniques a rule deliberately does not cover. The test `test_every_corpus_case_behaves_as_labeled` replays every case through the API and requires each rule to behave as labeled; known gaps must still be missed, so improving a rule means flipping that case on purpose.
 
 Result of the last run (the same table prints with `uv run pytest -s tests/test_corpus.py`):
 
@@ -77,10 +84,11 @@ Result of the last run (the same table prints with `uv run pytest -s tests/test_
 | SX-006 | 9 | 2 | 0 | 11 | 1.00 | 0.82 |
 | SX-007 | 10 | 1 | 0 | 9 | 1.00 | 0.91 |
 | SX-008 | 8 | 1 | 0 | 9 | 1.00 | 0.89 |
+| SX-009 | 9 | 3 | 0 | 10 | 1.00 | 0.75 |
 
-**How to read this.** These are regression numbers, not an evaluation. The same author wrote the rules and the cases, so precision of 1.00 mostly shows the rules do what they were written to do on cases the author thought of, and says little about real traffic. Recall below the 0.85 initial target for SX-001, 002, 003, 004 and 006 comes from the deliberate known-gap cases. The real evaluation (Milestone 8) needs independently produced events from the lab. Nothing here was run on real telemetry.
+**How to read this.** These are regression numbers, not an evaluation. The same author wrote the rules and the cases, so precision of 1.00 mostly shows the rules do what they were written to do on cases the author thought of, and says little about real traffic. Recall below the 0.85 initial target for SX-001, 002, 003, 004, 006 and 009 comes from the deliberate known-gap cases. The real evaluation (Milestone 8) needs independently produced events from the lab. Nothing here was run on real telemetry.
 
-Case format: `events` are compact descriptions (`k` = `p` process create, `n` network connect, `r` registry set value, `r12` registry key create/delete, `f` failed SSH login, `s` successful SSH login) expanded into raw Sysmon JSON or sshd lines by `backend/tests/corpus_runner.py`. All hosts, users and addresses are fictional or in documentation ranges; nothing in the corpus executes anything.
+Case format: `events` are compact descriptions (`k` = `p` process create, `n` network connect, `fc` file create, `r` registry set value, `r12` registry key create/delete, `f` failed SSH login, `s` successful SSH login) expanded into raw Sysmon JSON or sshd lines by `backend/tests/corpus_runner.py`. All hosts, users and addresses are fictional or in documentation ranges; nothing in the corpus executes anything.
 
 ## Adding a rule
 1. Write a `check(db, ev, cfg)` function returning `(group_key, [evidence events])` or `None`, and add a `Rule(...)` entry to `RULES`.

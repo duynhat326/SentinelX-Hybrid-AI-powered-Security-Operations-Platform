@@ -67,6 +67,7 @@ The backend container runs `alembic upgrade head` before starting. If you ran an
 | SX-006 | Script host or LOLBin connecting to an external address | T1071 |
 | SX-007 | Office application spawning a shell or script host | T1204.002 |
 | SX-008 | Repeated SSH failures followed by a successful login | T1110, T1078 |
+| SX-009 | Script host or Office application writing an executable to a user-writable folder | T1105 |
 
 Details, false positives and known gaps: [docs/detection-rules.md](docs/detection-rules.md).
 

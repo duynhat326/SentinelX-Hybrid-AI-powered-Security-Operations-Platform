@@ -36,6 +36,8 @@ def payload(ev: dict, i: int, host: str) -> dict:
                 "DestinationIp": ev["dst"], "DestinationPort": str(ev["port"])}
     elif k == "r":
         rec |= {"EventID": 13, "EventType": "SetValue", "TargetObject": ev["key"], "Details": ev["val"]}
+    elif k == "fc":
+        rec |= {"EventID": 11, "TargetFilename": ev["path"]}
     elif k == "r12":
         rec |= {"EventID": 12, "EventType": ev["type"], "TargetObject": ev["key"]}
     else:
