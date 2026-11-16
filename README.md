@@ -42,7 +42,7 @@ docker compose exec backend .venv/bin/python -m app.manage create-user alice adm
 export SENTINELX_API_KEY=...         # the same value you set in the environment file
 python3 lab/seed_demo.py             # 20 synthetic events, then open http://localhost:8080
 ```
-`docker compose down -v` deletes the database. Backup and restore: [docs/operations.md](docs/operations.md). A guided tour (in Vietnamese) with expected results: [docs/manual-testing.md](docs/manual-testing.md). A five-minute demo: [docs/demo-script.md](docs/demo-script.md).
+`docker compose down -v` deletes the database. Backup and restore: [docs/operations.md](docs/operations.md). The full test process from automated suites to a five-minute demo, with expected results (in Vietnamese): [docs/testing.md](docs/testing.md).
 
 ### Run the tests (no Docker needed)
 ```bash
@@ -119,6 +119,6 @@ Details, false positives and known gaps: [docs/detection-rules.md](docs/detectio
 - SF Compact (the dashboard font) is not redistributable and is not in the repository; without it the dashboard falls back to the system font ([docs/dashboard.md](docs/dashboard.md)).
 
 ## Documentation
-[architecture](docs/architecture.md) · [detection rules](docs/detection-rules.md) · [correlation and risk](docs/correlation-and-risk.md) · [database schema](docs/database-schema.md) · [security model](docs/security-model.md) · [threat intelligence](docs/threat-intelligence.md) · [response workflow](docs/response-workflow.md) · [AI investigation](docs/ai-investigation.md) · [dashboard](docs/dashboard.md) · [evaluation](docs/evaluation.md) · [threat model](docs/threat-model.md) · [operations](docs/operations.md) · [demo script](docs/demo-script.md) · [progress](docs/progress.md) · [checklist](docs/checklist.md) · [implementation plan](docs/implementation-plan.md)
+[architecture](docs/architecture.md) · [detection rules](docs/detection-rules.md) · [correlation and risk](docs/correlation-and-risk.md) · [database schema](docs/database-schema.md) · [security model](docs/security-model.md) · [threat intelligence](docs/threat-intelligence.md) · [response workflow](docs/response-workflow.md) · [AI investigation](docs/ai-investigation.md) · [dashboard](docs/dashboard.md) · [evaluation](docs/evaluation.md) · [threat model](docs/threat-model.md) · [testing](docs/testing.md) · [operations](docs/operations.md) · [progress](docs/progress.md) · [checklist](docs/checklist.md)
 
 Third-party: FastAPI, SQLAlchemy, Pydantic, LangGraph, PostgreSQL, React. All SentinelX code is original. License: MIT.

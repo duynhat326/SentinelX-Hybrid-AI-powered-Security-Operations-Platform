@@ -1,6 +1,6 @@
 # Lab scenarios A to E
 
-Safe, repeatable, **synthetic** scenarios. Every event is a text record: nothing executes, no payload is real, and hosts, users and addresses are fictional or in the RFC 5737 documentation ranges. Each scenario uses its own hosts and addresses, so scenarios do not merge with each other or with `lab/seed_demo.py`. Do not run the real-machine steps in this file anywhere but an isolated lab VM you own.
+Safe, repeatable, **synthetic** scenarios. Every event is a text record: nothing executes, no payload is real, and hosts, users and addresses are fictional or in the RFC 5737 documentation ranges. Each scenario uses its own hosts and addresses, so scenarios do not merge with each other, but they can merge with `lab/seed_demo.py` data or with an earlier run (shared users, addresses and time windows), and a second run adds to the failure counts: **run them once, on a clean stack** (see [docs/testing.md](../../docs/testing.md), phase 6). Do not run the real-machine steps in this file anywhere but an isolated lab VM you own.
 
 ```bash
 export SENTINELX_API_KEY=...                  # same value as in your .env
@@ -47,7 +47,7 @@ Each scenario also sends a **benign baseline** from another host that must raise
   **Not verified:** these real-VM steps were not run (no lab VM was available); the fixture path is what the tests cover. Forwarding through Wazuh uses `source: "wazuh"` as described in the README.
 
 ## D. Multi-stage attack chain
-- **Events (synthetic, labeled):** six failed SSH logins and then a successful one from `203.0.113.70` to `jump01`; on `ws-d01`, an encoded PowerShell command, `mshta.exe` connecting **to the same address**, and PowerShell writing `C:\Users\dave\AppData\Local\Temp\update.exe`.
+- **Events (synthetic, labeled):** six failed SSH logins and then a successful one from `203.0.113.70` to `jump01`; on `ws-d01`, an encoded PowerShell command, `mshta.exe` connecting **to the same address**, and PowerShell writing `C:\Users\dana\AppData\Local\Temp\update.exe`.
 - **Expect:** SX-001, SX-008, SX-002, SX-006 and SX-009 in **one** incident across two hosts. The outbound connection is what joins the two hosts (the attacker address is a login source on one and a destination on the other); the later alerts join by host. Techniques T1110, T1078, T1059.001, T1071, T1105; five distinct detections give the maximum correlation score, so risk is **94**. The timeline has 10 events in time order, ending process, network, file.
 - **Real-life false positives:** each stage alone has benign explanations; the value is in seeing them together.
 - **Assertions:** `[D]` and `test_scenario_d_joins_five_stages_across_two_hosts_into_one_ordered_timeline`.
