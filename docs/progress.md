@@ -98,3 +98,8 @@
 **Not verified:** screen readers and other browsers; behaviour with thousands of rows (lists are capped, no pagination); CI for this branch.
 **Known gaps:** no live updates; sessionStorage token; no user management in the UI; MITRE names only for the techniques the rules use.
 **Next:** Milestone 8: five lab scenarios (A to E), the evaluation report with measured numbers, threat model, demo script and release notes.
+
+## Session 13 — manual test guide (branch `docs/manual-testing`)
+**Done:** `docs/manual-testing.md` (Vietnamese): bring the stack up, create five users, seed, a tour of the dashboard per role with the expected result at each step, dry-run versus real actions with the kill switch, rollback, AI (mock), threat intelligence without provider keys, quick curl checks, the automated suites and troubleshooting. `lab/seed_demo.py` seeds 20 synthetic events (scenarios A to C) using only the standard library. Every number in the guide came from a real run of this data (overview 20 events, three incidents at risk 81, 69 and 56, risk 69 to 73 after an IOC, the exact refusal messages); the first draft said 16 timeline events and a re-run showed 14, now corrected.
+**Fix found while testing:** rolling back a blocklist action that was only a dry run told the user to "deactivate the entry" although none exists; it now says nothing was changed (test updated).
+**Not verified:** the guide's `.env` editing commands could not be run here (a tool policy blocks touching that file), so they are checked by reading only; the login rate limit through the proxy (unit-tested, not re-run end to end).
