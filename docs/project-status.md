@@ -75,7 +75,7 @@ Step-by-step test process with expected results: `docs/testing.md`.
 
 1. Defer Wazuh and Windows/Sysmon until RAM is upgraded? (Recommended: yes.)
 2. Accept one Linux VM for seven days as the lab version of the five-host exit criterion? (Recommended: yes.)
-3. VM tool: VirtualBox or libvirt/virt-manager?
+3. VM tool: decided, VMware Workstation (installed: `vmware`, `vmrun`, `vmware-networks`).
 4. Hardware of the lab host to pick the Ollama model (CPU i7-8565U, 15.4 GiB RAM, no GPU; RAM was 83% used at the last check).
 5. Names of the two approver accounts.
 
