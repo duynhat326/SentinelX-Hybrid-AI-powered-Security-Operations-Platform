@@ -31,7 +31,7 @@ Status: planned, not started. Scope and decisions come from `docs/decisions.md`;
 ### Step 1: preflight (half a day)
 1. Measure: `free -h`, `top` sorted by memory. Close what is not needed; target at least 5 GB available.
 2. Turn off automatic suspend while on AC power.
-3. Check tools: Docker and Compose, `uv`, Python 3.12 or newer, and a VM tool (VirtualBox or libvirt/virt-manager).
+3. Check tools: Docker and Compose, `uv`, Python 3.12 or newer, and VMware (`vmrun`, `vmware-networks`).
 4. Create the host-only network.
 
 **Done when:** `docker compose version` works, `free -h` shows at least 5 GB available with the stack idle, and the host-only network exists.
@@ -109,4 +109,4 @@ Status: planned, not started. Scope and decisions come from `docs/decisions.md`;
 
 1. Defer Wazuh and Windows for Phase 1 (recommended), or set them up now and accept the RAM limit?
 2. Accept one Linux VM for seven days as the lab version of the five-host exit criterion?
-3. Which VM tool do you want: VirtualBox or libvirt/virt-manager?
+3. VM tool: decided, VMware (host-only network via `vmware-networks`).
